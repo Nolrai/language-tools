@@ -1,83 +1,125 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module MyLib (parseFile, intoSCL2) where
-import Text.Trifecta
-import Data.Set (Set)
-import Data.Set qualified
-import Text.Parser.Combinators
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+{-# LANGUAGE RecordWildCards #-}
+module MyLib (parseFile, intoSCL2, Entry(..), Case(..), Line(..)) where
 import GHC.Int
 import Data.Maybe
-import System.IO
-import System.Exit (die)
+import System.IO ( IO, FilePath )
 import Data.Char
-import Data.List ((++), notElem, any, null)
-import Control.Applicative ((<|>), (*>), (<*), (<*>), (<$>), optional, pure)
-import Control.Monad ((>>=), (>>), fail)
 import Data.Function (($))
-import Data.Eq
-import Prelude (read, show)
 import Data.ByteString (ByteString)
 import GHC.Err
+import Control.Monad.Except
+import Text.Read (readMaybe)
+import Control.Applicative
+import Control.Monad (mapM, MonadFail (fail))
+import Text.Trifecta
+import Data.Text (Text, splitOn)
+import Data.Text.IO (readFile)
+import Data.Bool
+import GHC.Show (Show(..))
+import Data.Functor.Contravariant (Op(getOp))
+import Data.Eq ((==))
 
-type String = [Char]
+type Text = [Char]
 
 intoSCL2 :: [Entry] -> ByteString
 intoSCL2 = error "stub for intoSCL2"
 
 parseFile :: FilePath -> IO [Entry]
-parseFile path = do
-  result <- parseFromFileEx parseTable path
-  case result of
-    Failure err -> die (show err)
-    Success value -> pure value
+parseFile fileName = do
+  entries <- splitOn "\n" <$> readFile fileName
+  pure (parseEntry <$> entries)
 
-parseTable :: Parser [Entry]
-parseTable = sepBy parseEntry newline
+parseEntry :: Text -> Except [Text] Entry
+parseEntry entry = do
+  let [rankStr, spelling, rest] = splitOn "\t" entry
+  let Just rank = readMaybe rankStr
+  let lines = splitOn ";" rest
+  parsedLines <- mapM parseLine lines
+  pure Entry {entryRank = rank, entrySpelling = spelling, entryLines = parsedLines}
 
-parseEntry :: Parser Entry
-parseEntry = Entry <$> rankParser <*> spellingParser <*> linesParser
+data Token where
+  Note :: {tokenString' :: Text} -> Token
+  Ipa :: {ipaType :: IpaType, tokenString' :: Text} -> Token
+  Semicolon :: Token
 
-rankParser :: Parser Int -- either it's -1 or a nonnegative integer
-rankParser =
-  ((char '-' >> char '1' >> pure (-1)) <|> (read <$> some digit))
-  <* char '\t'
+tokenString :: Token -> Except Text Text
+tokenString (Note s) = pure s
+tokenString (Ipa _ s) = pure s
+tokenString Semicolon = fail "Semicolon has no string"
 
--- Parses the standard spelling of a word, which is a quoted string of english letters.
-spellingParser :: Parser String
-spellingParser = char '"' *> some englishLetter <* char '"' <* char '\t'
+data IpaType = IpaSlashType | IpaSquareType
+
+matchOpenning :: Char -> Maybe IpaType
+matchOpenning '/' = Just IpaSlashType
+matchOpenning '[' = Just IpaSquareType
+matchOpenning _   = Nothing
+
+matchEnding :: Char -> Maybe IpaType
+matchEnding '/' = Just IpaSlashType
+matchEnding ']' = Just IpaSquareType
+matchEnding _   = Nothing
+
+data TokenContext where
+  IpaContext :: IpaType -> Text -> TokenContext
+  NoteContext :: Text -> TokenContext
+  NoContext :: TokenContext
+
+toTokens :: Text -> Except Text [Token]
+toTokens = go NoContext
   where
-    englishLetter = satisfyRange 'a' 'z' <|> satisfyRange 'A' 'Z'
+    go :: TokenContext -> Text -> Except Text [Token]
+    go NoContext [] = pure []
+    go NoContext ('(':cs) = go (NoteContext []) cs
+    go NoContext (' ':cs) = go NoContext cs
+    go NoContext (';':cs) = (Semicolon :) <$> go NoContext cs
+    go NoContext (c:cs) =
+        case matchOpenning c of
+          Just ipaType -> go (IpaContext ipaType []) cs
+          Nothing      -> fail $ "lexing failed: go NoContext " ++ show (c:cs)
+    go (IpaContext ipaType sofar) (c : cs) = do
+      case matchEnding c of
+        Just endType ->
+          if endType == ipaType
+            then (Ipa ipaType (reverse sofar) :) <$> go NoContext cs
+            else fail $ "ipa ended by wrong delimiter: " ++ show c
+        Nothing ->
+          if c `elem` ipaChars
+            then go (IpaContext ipaType (c : sofar)) cs
+            else fail $ "lexing failed: none Ipa character, go IpaContext " ++ show (c : cs)
+    go (NoteContext sofar) (c : cs) =
+      case c of
+        ')' -> (Note (reverse sofar) :) <$> go NoContext cs
+        ',' -> (Note (reverse sofar) :) <$> go (NoteContext []) cs
+        _   -> go (NoteContext (c : sofar)) cs
+    go _ [] = fail "lexing failed, unexpected end of line"
 
-linesParser :: Parser [Line]
-linesParser = char '"' *> sepBy1 lineParser newline <* char '"'
+parseLine :: Text -> Except Text Line
+parseLine str = do
+  tokens <- toTokens str
+  let (lineNotes, rest) = spanWhileNotes tokens
+  cases <- parseCases rest
+  pure Line {cases = reverse cases, lineNotes = lineNotes}
 
-lineParser :: Parser Line
-lineParser = Line <$> sepBy1 caseParser (string ", ") <*> notes
-
-caseParser :: Parser Case
-caseParser = Case <$> notes <*> ipaParser
-
-wrapIn :: Char -> Parser a -> Char -> Parser a
-wrapIn open p close = char open *> p <* char close
-
-notes :: Parser [String]
-notes = fromMaybe [] <$> optional noteList
+spanWhileNotes :: [Token] -> ([Text], [Token])
+spanWhileNotes = go []
   where
-    noteList :: Parser [String]
-    noteList = wrapIn '(' (sepBy1 noteParser (string ", ")) ')'
-    noteParser :: Parser String
-    noteParser = some (noneOf ",)")
+    go acc (Note s : ts) = go (s : acc) ts
+    go acc ts = (acc, ts)
 
-ipaParser :: Parser String
-ipaParser = do
-  str <- wrapIn '/' (many (satisfy (/= '/'))) '/' <|> wrapIn '[' (many (satisfy (/= ']'))) ']'
-  if null str
-    then fail "Empty IPA transcription"
-    else if any (`notElem` str) ipaChars
-    then fail $ "Invalid characters in IPA transcription: " ++ str
-    else pure str
+parseCases :: [Token] -> Except Text [Case]
+parseCases [] = pure []
+parseCases (Ipa _ ipa : ts) = do
+  let (caseNotes, rest) = spanWhileNotes ts
+  let caseEntry = Case {caseNotes = reverse caseNotes, ipa = ipa}
+  otherCases <- parseCases rest
+  pure (caseEntry : otherCases)
+parseCases (t : _) = fail $ "expected IPA token, got: " ++ show t
 
-ipaChars :: String
-ipaChars = "I" -- UppercaseLetter
+
+ipaChars :: Text
+ipaChars = "IꞮ" -- UppercaseLetter
   ++ "abcdefghijklmnoprstuvwxyz" -- all the english lowercase letters except q
   ++ "äæçðøŋɐɑɒɔɘəɚɛɜɝɞɪɫɯɵɹɾʃʈʉʊʌʍʒθ" -- other LowercaseLetter
   ++ "ʰʱˈːˑ" -- ModifierLetter
@@ -86,11 +128,11 @@ ipaChars = "I" -- UppercaseLetter
   ++ "\771\776\778\794\798\799\800\805\809\810\815\865" -- NonSpacingMark
   ++ "\742\743" -- ModifierSymbol
 
-data Line = Line {cases :: [Case], lineNotes :: [String]}
-data Case = Case {caseNotes :: [String], ipa :: String}
+data Line = Line {cases :: [Case], lineNotes :: [Text]}
+data Case = Case {caseNotes :: [Text], ipa :: Text}
 
 data Entry = Entry
-  { rank :: Int
-  , spelling :: String
-  , lines :: [Line]
+  { entryRank :: Int
+  , entrySpelling :: Text
+  , entryLines :: [Line]
   }

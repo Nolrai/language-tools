@@ -86,6 +86,9 @@ library
 
     -- Other library packages from which modules are imported.
     build-depends:
+        , text ^>=2.1.2
+        , mtl ^>=2.3.1
+        , split ^>=0.2.5
         , base ^>=4.21.0.0
         , parsers ^>=0.12.10
         , containers >=0.7
