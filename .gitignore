@@ -29,3 +29,5 @@ cabal.project.local*
 /.hie/
 .ghc.environment.*
 /.hkgr/
+/data/*.sca2
+/data/*.lexurgy

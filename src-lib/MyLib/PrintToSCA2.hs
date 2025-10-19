@@ -19,6 +19,7 @@ import qualified Data.List as List
 import Data.Semigroup (Semigroup(..))
 
 import MyLib.Entry (Entry(..), Line(..), Case(..))
+import Data.Function (($))
 
 -- | Convert parsed entries into SCA² ByteString output.
 -- the output is UTF-8 encoded text
@@ -43,5 +44,6 @@ fromLine spelling Line{..} =
 fromCase :: Text -> [Text] -> Case -> Text
 fromCase spelling lineNotes Case{..} =
   let notesAll = caseNotes <> lineNotes
-      notesText = if List.null notesAll then "" else " (" <> T.intercalate ", " notesAll <> ")"
+      -- notes can contain "/" which SCA² interprets as a separator, so replace with "["
+      notesText = T.replace "/" "[" $ if List.null notesAll then "" else " (" <> T.intercalate ", " notesAll <> ")"
   in ipa <> " ‣ " <> "Gloss: " <> spelling <> notesText

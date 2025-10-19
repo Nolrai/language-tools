@@ -76,7 +76,8 @@ library
     -- Modules exported by the library.
     exposed-modules:
         , MyLib
-        , MyLib.Printing
+        , MyLib.PrintToSCA2
+        , MyLib.PrintToLexurgy
         , MyLib.EntryParser
         , MyLib.Entry
 
