@@ -2,10 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module MyLib.Printing (intoSCA2) where
+module MyLib.PrintToSCA2 (intoSCA2) where
 
-
--- Module: MyLib.Printing
+-- Module: MyLib.PrintToSCA2
 -- Summary: Conversion of parsed Entries to SCA² ByteString.
 --
 -- This module produces a UTF-8 encoded ByteString suitable for SCA².

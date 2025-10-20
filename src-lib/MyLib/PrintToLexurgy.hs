@@ -2,13 +2,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module MyLib.Printing (intoLexurgy) where
+module MyLib.PrintToLexurgy (intoLexurgy) where
 
-
--- Module: MyLib.Printing
--- Summary: Conversion of parsed Entries to SCA² ByteString.
+-- Module: MyLib.PrintToLexurgy
+-- Summary: Conversion of parsed Entries to Lexurgy ByteString.
 --
--- This module produces a UTF-8 encoded ByteString suitable for SCA².
+-- This module produces a UTF-8 encoded ByteString suitable for Lexurgy.
 -- For now the conversion is a simple textual formatting.
 
 import Data.ByteString (ByteString)
@@ -46,4 +45,4 @@ fromCase spelling lineNotes Case{..} =
   let notesAll = caseNotes <> lineNotes
       -- notes can contain "/" which Lexurgy interprets as a separator, so replace with "["
       notesText = T.replace "/" "[" $ if List.null notesAll then "" else " (" <> T.intercalate ", " notesAll <> ")"
-  in ipa <> "(" <> "Gloss: " <> spelling  <> ", " <> notesText <> ")"
+  in ipa <> "\t(" <> "Gloss: " <> spelling  <> ", " <> notesText <> ")"

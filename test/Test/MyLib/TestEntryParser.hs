@@ -1,11 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module TestMyLib (tests) where
+module MyLib.TestEntryParser (tests) where
 
-import Prelude (IO, ($), not, String, Applicative (pure))
+import Prelude (IO, ($), String, not)
 import Control.Monad.Except (runExcept)
-import Control.Exception (try, SomeException)
 import System.IO.Temp (withSystemTempFile)
 import System.IO (hClose)
 import Data.Text qualified as T
@@ -16,10 +15,13 @@ import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 import Data.List qualified as List
 
-import MyLib
+import MyLib.Entry (Entry(..), entryRank, entrySpelling, entryLines, cases, ipa)
+import MyLib.EntryParser (parseFile, Token(..), tokenString, IpaType(..))
+import Control.Exception (SomeException, try)
+import Control.Applicative (Applicative(..))
 
 tests :: TestTree
-tests = testGroup "MyLib tests"
+tests = testGroup "EntryParser"
   [ testGroup "tokenString"
       [ testCase "Note returns underlying text" $
           runExcept (tokenString (Note ("a note" :: T.Text)))
@@ -62,5 +64,17 @@ tests = testGroup "MyLib tests"
             -- parseFile is expected to throw; catch exceptions and assert failure occurred
             r <- try (parseFile path) :: IO (Either SomeException [Entry])
             assertBool "parseFile should throw on malformed entry" (isLeft r)
+      ]
+
+  , testGroup "tokenization"
+      [ testCase "tokenString handles Note and Ipa together" $
+          let n = Note ("(comment)" :: T.Text)
+              i = Ipa IpaSlashType ("tɪst" :: T.Text)
+          in do
+            runExcept (tokenString n) @?= Right ("(comment)" :: T.Text)
+            runExcept (tokenString i) @?= Right ("tɪst" :: T.Text)
+
+      , testCase "tokenString returns Left for non-string tokens (Semicolon)" $
+          runExcept (tokenString Semicolon) @?= Left ("Semicolon has no string" :: T.Text)
       ]
   ]

@@ -30,6 +30,7 @@ module MyLib.EntryParser
   ) where
 
 import MyLib.Entry (Entry(..), Line(..), Case(..))
+import MyLib.IPA (isIPAChar)
 
 import Prelude
 
@@ -179,25 +180,6 @@ parseCases (Ipa _ ipaText : ts) = do
   otherCases <- parseCases rest'
   pure (caseEntry : otherCases)
 parseCases (t : _) = throwError $ "expected IPA token, got: " <> shorten (tshow t)
-
-isIPAChar :: Char -> Bool
-isIPAChar c = Set.member (fromEnum c) ipaSet
-
--- | Allowed characters inside IPA spans (letters, modifiers, combining marks, etc.).
-ipaSet :: IntSet
-ipaSet = Set.fromList (List.map fromEnum (T.unpack ipaChars))
-  where
-  ipaChars :: Text
-  ipaChars = T.concat
-    [ "IꞮ" -- UppercaseLetter
-    , "abcdefghijklmnoprstuvwxyz" -- english lowercase letters (q omitted)
-    , "äæçðøŋɐɑɒɔɘəɚɛɜɝɞɪɫɯɵɹɾʃʈʉʊʌʍʒθ" -- other letters
-    , "ʰʱˈːˑ" -- modifier letters
-    , "ʔ" -- glottal stop
-    , T.pack "\771\776\778\794\798\799\800\805\809\810\815\865" -- NonSpacingMark codepoints
-    , T.pack "\742\743" -- ModifierSymbol
-    , ".()" -- Puctuation
-    ]
 
 -- | Read a tab-separated input file and parse each entry; if there are parse
 -- errors, return them (full) via Left so callers can choose how to present them.

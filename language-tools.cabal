@@ -76,10 +76,13 @@ library
     -- Modules exported by the library.
     exposed-modules:
         , MyLib
-        , MyLib.PrintToSCA2
-        , MyLib.PrintToLexurgy
-        , MyLib.EntryParser
         , MyLib.Entry
+        , MyLib.EntryParser
+        , MyLib.IPA
+        , MyLib.IPANormalize
+        , MyLib.LexurgyExport
+        , MyLib.PrintToLexurgy
+        , MyLib.PrintToSCA2
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -137,7 +140,14 @@ test-suite language-tools-test
     import:           best-practice
 
     -- Base language which the package is written in.
-    other-modules: TestMyLib
+    other-modules:
+        TestMyLib
+        MyLib.TestEntryParser
+        MyLib.TestLexurgyExport
+        MyLib.TestIPA
+        MyLib.TestPrintToLexurgy
+        MyLib.TestPrintToSCA2
+        MyLib.TestPrintToLexurgy
     default-language: GHC2024
 
     -- Modules included in this executable, other than Main.
@@ -157,6 +167,7 @@ test-suite language-tools-test
 
     -- Test dependencies.
     build-depends:
+        , template-haskell ^>=2.23.0.0
         , base >=4.21.0.0 && < 5
         , language-tools
         , text >= 2.1.2
