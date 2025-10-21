@@ -152,6 +152,7 @@ test-suite language-tools-test
         Test.MyLib.LexurgyExport
         Test.MyLib.LexurgyInstances
         Test.MyLib.IPA
+        Test.MyLib.IPANormalize
         Test.MyLib.PrintToLexurgy
         Test.MyLib.PrintToSCA2
         Test.MyLib.PrintToLexurgy

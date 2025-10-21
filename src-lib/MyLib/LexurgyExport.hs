@@ -5,17 +5,9 @@ module MyLib.LexurgyExport
   ) where
 
 import Prelude
-import GHC.Generics (Generic)
-import Data.Vector (Vector)
-import MyLib.EnumerateGeneric
-  ( Enumerable(..)
-  , makeEnumOps
-  , minBoundFromVec
-  , maxBoundFromVec
-  )
+
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 import qualified Data.IntMap as IntMap
 import Data.IntMap (IntMap)
 import qualified Data.Set as Set
@@ -23,7 +15,7 @@ import Data.Set (Set)
 import Data.Char (chr, ord)
 import qualified Data.Foldable
 import MyLib.LexurgyTypes
-import MyLib.LexurgyInstances
+import MyLib.LexurgyInstances ()
 
 featuresMap :: IntMap LexurgyMeaning
 featuresMap = IntMap.fromList $

@@ -2,10 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Test.MyLib (tests) where
-
-import Prelude (IO)
 import Test.Tasty
-import Test.Tasty.HUnit
 
 import Test.MyLib.EntryParser qualified as EntryParser
 import Test.MyLib.IPANormalize qualified as IPANormalize

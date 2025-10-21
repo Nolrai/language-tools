@@ -29,7 +29,7 @@ main = do
 
   putStrLn "writing lexurgy files..."
   putStrLn $ "writing lexurgy definitions to: " <> prefix <> ".sc"
-  writeFile (unpack (prefix <> ".sc")) (encodeUtf8 lexurgyPrelude)
+  writeFile (unpack (prefix <> ".lsc")) (encodeUtf8 lexurgyPrelude)
   putStrLn $ "writing word list to: " <> prefix <> ".wl"
-  writeFile (unpack (prefix <> ".wl")) $ intoLexurgy result
+  writeFile (unpack (prefix <> ".wli")) $ intoLexurgy result
   exitSuccess

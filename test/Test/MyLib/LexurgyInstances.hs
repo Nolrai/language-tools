@@ -4,7 +4,7 @@ module Test.MyLib.LexurgyInstances (tests) where
 
 import Prelude
 import Control.Exception (try, evaluate, SomeException)
-import Control.Monad (forM_, when)
+import Control.Monad (forM_)
 import Test.Tasty
 import Test.Tasty.HUnit
 import Data.Vector (Vector, (!))
@@ -64,7 +64,7 @@ testEnum =
       Right _ -> assertFailure ("Expected exception for toEnum " ++ show n)
   ]
 
-testEnumMatchesEnumerable :: forall a. (Eq a, Enum a, Enumerable a, Show a, Bounded a) => TestTree
+testEnumMatchesEnumerable :: forall a. (Eq a, Enum a, Enumerable a, Show a) => TestTree
 testEnumMatchesEnumerable =
   let vec = allValues :: Vector a
       n = V.length vec in

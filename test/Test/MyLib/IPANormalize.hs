@@ -13,12 +13,12 @@ import MyLib.IPANormalize (normalizeIpaText)
 tests :: TestTree
 tests = testGroup "IPANormalize"
   [ testCase "normalizeIpaText maps presentation variants to canonical IPA" $
-      let before = T.pack "I Ɪ ɪ a"
-          after = normalizeIpaText before
+      let beforeNorm = T.pack "I Ɪ ɪ a"
+          afterNorm = normalizeIpaText beforeNorm
       in do
-        assertBool "contains canonical ɪ" ("ɪ" `T.isInfixOf` after)
-        assertBool "does not contain ASCII I" (not ("I" `T.isInfixOf` after))
-        assertBool "does not contain Ɪ variant" (not ("Ɪ" `T.isInfixOf` after))
+        assertBool "contains canonical ɪ" ("ɪ" `T.isInfixOf` afterNorm)
+        assertBool "does not contain ASCII I" (not ("I" `T.isInfixOf` afterNorm))
+        assertBool "does not contain Ɪ variant" (not ("Ɪ" `T.isInfixOf` afterNorm))
 
   , QC.testProperty "normalizeIpaText is idempotent" $
       \(s :: String) ->
