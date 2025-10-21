@@ -1,4 +1,4 @@
-module Main (tests) where
+module Main (main) where
 
 import Test.Tasty (defaultMain)
 import Test.MyLib (tests)

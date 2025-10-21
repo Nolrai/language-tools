@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, TypeApplications, AllowAmbiguousTypes #-}
 
-module Test.MyLib.LexurgyExport (tests) where
+module Test.MyLib.LexurgyInstances (tests) where
 
 import Prelude
 import Control.Exception (try, evaluate, SomeException)
@@ -11,18 +11,24 @@ import Data.Vector (Vector, (!))
 import qualified Data.Vector as V
 import MyLib.EnumerateGeneric
 
-import MyLib.LexurgyExport
+import MyLib.LexurgyInstances()
+import MyLib.LexurgyTypes
+  ( Feature
+  , VowelFeature
+  , ConsonantFeature
+  , FloatingFeature
+  )
 
 tests :: TestTree
 tests =
-  testGroup "LexurgyExport Enum instances"
+  testGroup "Lexurgy Enum instances"
       [ testGeneratedInstances @Feature
       , testGeneratedInstances @VowelFeature
       , testGeneratedInstances @ConsonantFeature
       , testGeneratedInstances @FloatingFeature
       ]
 
-testGeneratedInstances :: forall a. (Eq a, Enum a, Enumerable a, Show a, Bounded a, Ord a) => TestTree
+testGeneratedInstances :: forall a. (Enum a, Enumerable a, Show a, Bounded a, Ord a) => TestTree
 testGeneratedInstances =
   testGroup "Generated Enum and Bounded instances"
     [ testEnum @a
@@ -31,7 +37,7 @@ testGeneratedInstances =
     , testEnumMatchesOrd @a
     ]
 
-testEnum :: forall a. (Eq a, Enum a, Enumerable a, Show a, Bounded a) => TestTree
+testEnum :: forall a. (Eq a, Enum a, Enumerable a, Show a) => TestTree
 testEnum =
   let vec = allValues :: Vector a
       n = V.length vec in
@@ -72,7 +78,7 @@ testEnumMatchesEnumerable =
       toEnum i @?= v
   ]
 
-testEnumeratedBounds :: forall a. (Eq a, Enumerable a, Bounded a) => TestTree
+testEnumeratedBounds :: forall a. (Eq a, Enumerable a, Bounded a, Show a) => TestTree
 testEnumeratedBounds =
   let vec = allValues :: Vector a
       n = V.length vec in
