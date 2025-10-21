@@ -1,25 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- Simple exporter that defines the Lexurgy feature definition preamble.
 module MyLib.LexurgyExport
-  ( lexurgyFeatureDeclarations
-  , lexurgyDefinitions
-  , writeLexurgyFeatures
-  , Feature(..)
-  , VowelFeature(..)
-  , ConsonantFeature(..)
-  , Height(..)
-  , Backness(..)
-  , Place(..)
-  , Manner(..)
-  , Voice(..)
-  , FloatingFeature(..)
-  , Length(..)
-  , Stress(..)
-  , PrePost(..)
-  , LexurgyMeaning(..)
+  ( lexurgyPrelude
   ) where
 
 import Prelude
+import GHC.Generics (Generic)
+import Data.Vector (Vector)
+import MyLib.EnumerateGeneric
+  ( Enumerable(..)
+  , makeEnumOps
+  , minBoundFromVec
+  , maxBoundFromVec
+  )
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
@@ -28,162 +21,9 @@ import Data.IntMap (IntMap)
 import qualified Data.Set as Set
 import Data.Set (Set)
 import Data.Char (chr, ord)
-
-data Feature
-  = VowelFeature VowelFeature
-  | ConsonantFeature ConsonantFeature
-  | Nazalized
-  | Floating FloatingFeature
-  | Syllabic Bool   -- ̩  (COMBINING VERTICAL LINE BELOW) : syllabic -- ̯  (COMBINING INVERTED BREVE BELOW) : non-syllabic
-  | TieBar          -- ͡  (COMBINING DOUBLE INVERTED BREVE) : tie bar / affricate tie
-  deriving (Eq, Show, Ord)
-
-instance Bounded Feature where
-  minBound = VowelFeature minBound
-  maxBound = TieBar
-
-instance Enum Feature where
-  succ (VowelFeature vf) =
-    if vf == maxBound then ConsonantFeature minBound else VowelFeature (succ vf)
-  succ (ConsonantFeature cf) =
-    if cf == maxBound then Nazalized else ConsonantFeature (succ cf)
-  succ Nazalized = Floating minBound
-  succ (Floating ff) =
-    if ff == maxBound then Syllabic False else Floating (succ ff)
-  succ (Syllabic b) =
-    if b == maxBound then TieBar else Syllabic $ succ b
-  succ TieBar = TieBar
-
-  pred TieBar = Syllabic True
-  pred (Syllabic b) =
-    if b then Floating maxBound else Syllabic True
-  pred (Floating ff) =
-    if ff == minBound then Nazalized else Floating (pred ff)
-  pred Nazalized = ConsonantFeature maxBound
-  pred (ConsonantFeature cf) =
-    if cf == minBound then VowelFeature maxBound else ConsonantFeature (pred cf)
-  pred (VowelFeature vf) = VowelFeature (pred vf)
-
-data VowelFeature
-  = Height Height
-  | Backness Backness
-  | Rounding Bool
-  | Centralized
-  | Advanced        -- +̟  (COMBINING PLUS SIGN BELOW) : advanced / fronted
-  | Retracted       -- ̠  (COMBINING MINUS SIGN BELOW) : retracted / backed
-  | Lowered         -- ̞  (COMBINING DOWN TACK BELOW) : lowered (more open)
-  | NonSyllabic     -- ̯  (COMBINING INVERTED BREVE BELOW) : non-syllabic
-  | Rhotic          -- ɚ / ɝ variants: rhoticity
-  deriving (Eq, Show, Ord)
-
-instance Bounded VowelFeature where
-  minBound = Height minBound
-  maxBound = Rhotic
-
-instance Enum VowelFeature where
-  succ (Height h) =
-    if h == maxBound then Backness minBound else Height (succ h)
-  succ (Backness b) =
-    if b == maxBound then Rounding minBound else Backness (succ b)
-  succ (Rounding False) = Rounding True
-  succ (Rounding True) = Centralized
-  succ Centralized = Advanced
-  succ Advanced = Retracted
-  succ Retracted = Lowered
-  succ Lowered = NonSyllabic
-  succ NonSyllabic = Rhotic
-  succ Rhotic = Rhotic  -- no successor
-
-  pred Rhotic = NonSyllabic
-  pred NonSyllabic = Lowered
-  pred Lowered = Retracted
-  pred Retracted = Advanced
-  pred Advanced = Centralized
-  pred Centralized = Rounding maxBound
-  pred (Rounding True) = Rounding False
-  pred (Rounding False) = Backness maxBound
-  pred (Backness b) =
-    if b == minBound then Height maxBound else Backness (pred b)
-  pred (Height h) = Height (pred h)
-
-data Height = Close | NearClose | CloseMid | Mid | OpenMid | NearOpen | Open
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data Backness = Front | NearFront | Central | NearBack | Back
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data ConsonantFeature
-  = Place Place
-  | Manner Manner
-  | Voice Voice
-  | Velarization
-  | Unreleased
-  | Apical          -- ̚ / ̯ variants: apical/articulatory narrow diacritic
-  deriving (Eq, Show, Ord)
-
-instance Bounded ConsonantFeature where
-  minBound = Place minBound
-  maxBound = Apical
-
-instance Enum ConsonantFeature where
-  succ (Place p) =
-    if p == maxBound then Manner minBound else Place (succ p)
-  succ (Manner m) =
-    if m == maxBound then Voice minBound else Manner (succ m)
-  succ (Voice v) =
-    if v == maxBound then Velarization else Voice (succ v)
-  succ Velarization = Unreleased
-  succ Unreleased = Apical
-  succ Apical = Apical
-
-  pred Apical = Unreleased
-  pred Unreleased = Velarization
-  pred Velarization = Voice maxBound
-  pred (Voice v) =
-    if v == minBound then Manner maxBound else Voice (pred v)
-  pred (Manner m) =
-    if m == minBound then Place maxBound else Manner (pred m)
-  pred (Place p) = Place (pred p)
-
-data Place
-  = Bilabial | Labiodental | InterDental | Dental | DentalAlveolar | Alveolar | Postalveolar | Retroflex
-  | Palatal | Velar | Labiovelar | Glottal
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data Manner
-  = Stop | Nasal | Fricative | Approximant | LateralApproximant | Trill | Tap | FricativeApproximant
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data Voice = Voiced | Voiceless
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data FloatingFeature
-  = Aspiration | BreathyVoice | Stress Stress | Length Length
-  deriving (Eq, Show, Ord)
-
-instance Bounded FloatingFeature where
-  minBound = Aspiration
-  maxBound = Length maxBound
-
-instance Enum FloatingFeature where
-  succ Aspiration = BreathyVoice
-  succ (Stress s) = if s == maxBound then Length minBound else Stress (succ s)
-  succ (Length l) = Length (succ l)
-
-data Length = Half | Full | Long
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data Stress = PrimaryStress | SecondaryStress | NoStress
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data PrePost = Pre | Post
-  deriving (Eq, Show, Enum, Ord, Bounded)
-
-data LexurgyMeaning
-  = LexurgySymbol (Set Feature)
-  | LexurgyDiacritic (Set Feature) PrePost
-  | LexurgyMeta
-  deriving (Eq, Show)
+import qualified Data.Foldable
+import MyLib.LexurgyTypes
+import MyLib.LexurgyInstances
 
 featuresMap :: IntMap LexurgyMeaning
 featuresMap = IntMap.fromList $
@@ -280,7 +120,6 @@ featuresMap = IntMap.fromList $
     sym c fs = (ord c, LexurgySymbol (Set.fromList fs))
     dia c fs pos = (ord c, LexurgyDiacritic (Set.fromList fs) pos)
     meta c = (ord c, LexurgyMeta)
-    symInt i fs = (i, LexurgySymbol (Set.fromList fs))
     diaInt i fs pos = (i, LexurgyDiacritic (Set.fromList fs) pos)
 
 lexurgyFeatureDeclarations :: Text
@@ -313,26 +152,37 @@ lexurgyFeatureDeclarations = T.unlines
 lexurgyDefinitions :: Text
 lexurgyDefinitions = T.unlines $ map (uncurry showLexurgyMeaning) $ IntMap.toList featuresMap
 
-c2t = T.singleton
+(<:) :: Char -> Text -> Text
+c <: t = T.cons c t
+
+-- Helpers for rendering
+posText :: PrePost -> Text
+posText Pre = "(before)"
+posText Post = "" -- intentionally left blank for after
+
+-- space-separated feature list
+renderFeatures :: Set Feature -> Text
+renderFeatures fs = T.intercalate " " $ map showFeature (Set.toList fs)
 
 showLexurgyMeaning :: Int -> LexurgyMeaning -> Text
 showLexurgyMeaning code meaning =
   let c = chr code in
   case meaning of
     LexurgySymbol fs ->
-      T.concat [ T.cons c "\t"
-              , T.intercalate "\t" (map showFeature (Set.toList fs))
-              ]
+      "symbol " <> c <: " [" <> renderFeatures fs <> "]"
     LexurgyDiacritic fs pos ->
-      T.concat [ T.cons c "\t"
-              , T.intercalate "\t" (map showFeature (Set.toList fs))
-              ]
-    LexurgyDiacritic fs pos ->
-      T.concat [ T.cons c "\t"
-              , T.intercalate "\t" (map showFeature (Set.toList fs))
-              , T.pack (show pos)
-              ]
-    LexurgyMeta -> T.pack "# " <> c2t c <> "\t"
+      "diacritic " <> c <: posText pos <> floatingText fs <> " [" <> renderFeatures fs <> "] "
+    LexurgyMeta -> "# " <> c <: " (meta)"
+
+floatingText :: Set Feature -> Text
+floatingText fs =
+  if Data.Foldable.any isFloating fs
+    then " (floating)"
+    else ""
+  where
+    isFloating :: Feature -> Bool
+    isFloating (Floating _) = True
+    isFloating _            = False
 
 showFeature :: Feature -> Text
 showFeature f = case f of
@@ -358,8 +208,21 @@ showFeature f = case f of
     Retracted -> "retracted"
     Lowered -> "lowered"
     NonSyllabic -> "nonsyllabic"
+    Rhotic -> "rhotic"
   ConsonantFeature cf -> case cf of
     Place p -> case p of
+      Bilabial -> "bilabial"
+      Labiodental -> "labiodental"
+      InterDental -> "interdental"
+      Dental -> "dental"
+      DentalAlveolar -> "dentalalveolar"
+      Alveolar -> "alveolar"
+      Postalveolar -> "postalveolar"
+      Retroflex -> "retroflex"
+      Palatal -> "palatal"
+      Velar -> "velar"
+      Labiovelar -> "labiovelar"
+      Glottal -> "glottal"
 
     Manner m -> T.pack $ show m
     Voice v -> case v of
@@ -380,9 +243,12 @@ showFeature f = case f of
       Half -> "half"
       Full -> "full"
       Long -> "long"
+  Syllabic b -> if b then "syllabic" else "nonsyllabic"
+  TieBar -> "tiebar"
 
--- | Write the Lexurgy feature file to the given output path.
-writeLexurgyFeatures :: FilePath -> IO ()
-writeLexurgyFeatures outPath = do
-  let contents = T.unlines []
-  TIO.writeFile outPath contents
+lexurgyPrelude :: Text
+lexurgyPrelude = T.unlines
+  [ "# Lexurgy prelude definitions"
+  , lexurgyFeatureDeclarations
+  , lexurgyDefinitions
+  ]

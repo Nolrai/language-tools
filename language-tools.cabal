@@ -78,9 +78,12 @@ library
         , MyLib
         , MyLib.Entry
         , MyLib.EntryParser
+        , MyLib.EnumerateGeneric
         , MyLib.IPA
         , MyLib.IPANormalize
         , MyLib.LexurgyExport
+        , MyLib.LexurgyInstances
+        , MyLib.LexurgyTypes
         , MyLib.PrintToLexurgy
         , MyLib.PrintToSCA2
 
@@ -92,6 +95,9 @@ library
 
     -- Other library packages from which modules are imported.
     build-depends:
+        , vector ^>=0.13.2.0
+        , template-haskell ^>=2.23.0.0
+        , array ^>=0.5.8.0
         , text ^>=2.1.2
         , mtl ^>=2.3.1
         , split ^>=0.2.5
@@ -141,13 +147,14 @@ test-suite language-tools-test
 
     -- Base language which the package is written in.
     other-modules:
-        TestMyLib
-        MyLib.TestEntryParser
-        MyLib.TestLexurgyExport
-        MyLib.TestIPA
-        MyLib.TestPrintToLexurgy
-        MyLib.TestPrintToSCA2
-        MyLib.TestPrintToLexurgy
+        Test.MyLib
+        Test.MyLib.EntryParser
+        Test.MyLib.LexurgyExport
+        Test.MyLib.LexurgyInstances
+        Test.MyLib.IPA
+        Test.MyLib.PrintToLexurgy
+        Test.MyLib.PrintToSCA2
+        Test.MyLib.PrintToLexurgy
     default-language: GHC2024
 
     -- Modules included in this executable, other than Main.
@@ -167,6 +174,8 @@ test-suite language-tools-test
 
     -- Test dependencies.
     build-depends:
+        , language-tools ^>=0.1.0.0
+        , vector ^>=0.13.2.0
         , template-haskell ^>=2.23.0.0
         , base >=4.21.0.0 && < 5
         , language-tools

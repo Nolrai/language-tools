@@ -3,8 +3,7 @@ module MyLib
   ( parseFile
   , intoSCA2
   , intoLexurgy
-  , lexurgyFeatureDeclarations
-  , lexurgyDefinitions
+  , lexurgyPrelude
   , Entry(..)
   , Case(..)
   , Line(..)
@@ -14,4 +13,4 @@ import MyLib.Entry (Entry(..), Line(..), Case(..))
 import MyLib.EntryParser (parseFile)
 import MyLib.PrintToSCA2 (intoSCA2)
 import MyLib.PrintToLexurgy (intoLexurgy)
-import MyLib.LexurgyExport (lexurgyFeatureDeclarations, lexurgyDefinitions)
+import MyLib.LexurgyExport (lexurgyPrelude)

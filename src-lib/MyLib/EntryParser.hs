@@ -42,8 +42,6 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Either (partitionEithers)
 import qualified Data.List as List
-import Data.IntSet (IntSet)
-import qualified Data.IntSet as Set
 
 -- | Convert Showable value to Text.
 tshow :: Show a => a -> Text

@@ -1,7 +1,7 @@
-module Main (main) where
+module Main (tests) where
 
 import Test.Tasty (defaultMain)
-import TestMyLib (tests)
+import Test.MyLib (tests)
 
 main :: IO ()
 main = defaultMain tests

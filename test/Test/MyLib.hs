@@ -1,23 +1,25 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module TestMyLib (TestMyLib.tests) where
+module Test.MyLib (tests) where
 
 import Prelude (IO)
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import MyLib.TestEntryParser qualified as TestEntryParser
-import MyLib.TestIPANormalize qualified as TestIPANormalize
-import MyLib.TestLexurgyExport qualified as TestLexurgyExport
-import MyLib.TestPrintToLexurgy qualified as TestPrintToLexurgy
+import Test.MyLib.EntryParser qualified as EntryParser
+import Test.MyLib.IPANormalize qualified as IPANormalize
+import Test.MyLib.LexurgyExport qualified as LexurgyExport
+import Test.MyLib.LexurgyInstances qualified as LexurgyInstances
+import Test.MyLib.PrintToLexurgy qualified as PrintToLexurgy
 
 tests :: TestTree
 tests = testGroup "MyLib tests"
-  [ TestEntryParser.tests
-  , TestIPANormalize.tests
+  [ EntryParser.tests
+  , IPANormalize.tests
   , testGroup "Lexurgy Modules tests"
-      [ TestLexurgyExport.tests
-      , TestPrintToLexurgy.tests
+      [ LexurgyInstances.tests
+      , LexurgyExport.tests
+      , PrintToLexurgy.tests
       ]
   ]

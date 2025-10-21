@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module MyLib.TestIPANormalize (tests) where
+module Test.MyLib.IPANormalize (tests) where
 
 import Prelude (String, ($), not)
 import Test.Tasty
