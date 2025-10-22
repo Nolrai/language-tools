@@ -36,7 +36,6 @@ data VowelFeature
   | Advanced
   | Retracted
   | Lowered
-  | NonSyllabic
   | Rhotic
   deriving (Eq, Show, Ord, Generic)
 

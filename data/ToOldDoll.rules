@@ -1,3 +1,0 @@
-# Lexurgy rules for converting english to Proto Doll
-place_erasure:
-  {[bilabial], [labiodental], [dental], [alveolar], [postalveolar], [palatal], [velar], [uvular]} => [alveolar] / _ #sud

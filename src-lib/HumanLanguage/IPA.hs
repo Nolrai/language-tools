@@ -23,7 +23,7 @@ ipaChars = T.concat
   , "äæçðøŋɐɑɒɔɘəɚɛɜɝɞɪɫɯɵɹɾʃʈʉʊʌʍʒθ" -- other letters
   , "ʰʱˈːˑ" -- modifier letters
   , "ʔ" -- glottal stop
-  , T.pack "\771\776\778\794\798\799\800\805\809\810\815\865" -- NonSpacingMark codepoints
+  , T.pack "\771\776\778\794\798\799\800\805\809\810\815" -- NonSpacingMark codepoints
   , T.pack "\742\743" -- ModifierSymbol
   , "." -- SylableBreak
   , "()" -- parentheses for optional segments

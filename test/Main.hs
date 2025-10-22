@@ -11,7 +11,7 @@ main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "MyLib tests"
+tests = testGroup "HumanLanguage tests"
   [ EntryParser.tests
   , IPANormalize.tests
   , testGroup "Lexurgy Modules tests"

@@ -7,9 +7,6 @@ module HumanLanguage.IPANormalize
 import Prelude
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.IntMap as IntMap
-import Data.IntMap (IntMap)
-import Data.Char (ord, chr)
 import qualified Data.Map.Strict as Map
 
 -- Definitive mapping of presentation / legacy variants -> canonical IPA char.

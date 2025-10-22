@@ -2,7 +2,6 @@
 -- Simple exporter that defines the Lexurgy feature definition preamble.
 module HumanLanguage.LexurgyExport
   ( lexurgyPrelude
-  , lexurgyDefaultRules
   ) where
 
 import Prelude
@@ -102,9 +101,9 @@ featuresMap = IntMap.fromList $
     , diaInt 805 [ConsonantFeature (Voice Voiceless)] Post    -- U+0325 COMBINING RING BELOW : voiceless (below)
     , diaInt 809 [Syllabic True] Post             -- U+0329 COMBINING VERTICAL LINE BELOW : syllabic
     , diaInt 810 [ConsonantFeature (Place Dental)] Post       -- U+032A COMBINING BRIDGE BELOW : dental
-    , diaInt 815 [VowelFeature NonSyllabic] Post              -- U+032F COMBINING INVERTED BREVE BELOW : non-syllabic
-    , diaInt 865 [TieBar] Post               -- U+0361 COMBINING DOUBLE INVERTED BREVE : tie bar (affricate / affixation)
+    , diaInt 815 [Syllabic False] Post              -- U+032F COMBINING INVERTED BREVE BELOW : non-syllabic
     ]
+
   where
     mkVowel :: Char -> [VowelFeature] -> (Int, LexurgyMeaning)
     mkConsonant :: Char -> [ConsonantFeature] -> (Int, LexurgyMeaning)
@@ -131,7 +130,7 @@ lexurgyFeatureDeclarations = T.unlines
   , "# Consonant features"
   , "Feature place(bilabial, labiodental, interdental, dental, dentalalveolar, alveolar, postalveolar, retroflex, palatal, velar, labiovelar, glottal)"
   , "Feature manner(stop, nasal, fricative, approximant, lateralapproximant, trill, tap, fricativeapproximant)"
-  , "Feature voice(unvoiced, voiced)"
+  , "Feature voiced"
   , "Feature +velarized"
   , "Feature +unreleased"
   , "Feature +apical"
@@ -140,6 +139,7 @@ lexurgyFeatureDeclarations = T.unlines
   , "Feature +breathyvoice"
   , "Feature stress(primarystress, secondarystress, nostress)"
   , "Feature length(half, full, long)"
+  , "Feature +tiebar"
   ]
 
 lexurgyDefinitions :: Text
@@ -196,12 +196,11 @@ showFeature f = case f of
       Back -> "back"
     Rounding False -> "-rounded"
     Rounding True -> "+rounded"
-    Centralized -> "centralized"
-    Advanced -> "advanced"
-    Retracted -> "retracted"
-    Lowered -> "lowered"
-    NonSyllabic -> "nonsyllabic"
-    Rhotic -> "rhotic"
+    Centralized -> "+centralized"
+    Advanced -> "+advanced"
+    Retracted -> "+retracted"
+    Lowered -> "+lowered"
+    Rhotic -> "+rhotic"
   ConsonantFeature cf -> case cf of
     Place p -> case p of
       Bilabial -> "bilabial"
@@ -221,13 +220,13 @@ showFeature f = case f of
     Voice v -> case v of
       Voiced -> "+voiced"
       Voiceless -> "-voiced"
-    Velarization -> "velarized"
-    Unreleased -> "unreleased"
-    Apical -> "apical"
-  Nazalized -> "nasalized"
+    Velarization -> "+velarized"
+    Unreleased -> "+unreleased"
+    Apical -> "+apical"
+  Nazalized -> "+nasalized"
   Floating ff -> case ff of
-    Aspiration -> "aspiration"
-    BreathyVoice -> "breathyvoice"
+    Aspiration -> "+aspiration"
+    BreathyVoice -> "+breathyvoice"
     Stress s -> case s of
       PrimaryStress -> "primarystress"
       SecondaryStress -> "secondarystress"
@@ -236,7 +235,7 @@ showFeature f = case f of
       Half -> "half"
       Full -> "full"
       Long -> "long"
-  Syllabic b -> if b then "syllabic" else "nonsyllabic"
+  Syllabic b -> if b then "+syllabic" else "-syllabic"
   TieBar -> "tiebar"
 
 lexurgyPrelude :: Text
@@ -244,13 +243,4 @@ lexurgyPrelude = T.unlines
   [ "# Lexurgy prelude definitions"
   , lexurgyFeatureDeclarations
   , lexurgyDefinitions
-  ]
-
-lexurgyDefaultRules :: Text
-lexurgyDefaultRules = T.unlines
-  [ "# Default phonological rules for Old Doll from modern English input"
-  , "# Example rules - customize as needed"
-  , ""
-  , "assimilate-place:"
-  , "  [place] => [alveolar]"
   ]
