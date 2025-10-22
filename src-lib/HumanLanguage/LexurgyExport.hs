@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- Simple exporter that defines the Lexurgy feature definition preamble.
-module MyLib.LexurgyExport
+module HumanLanguage.LexurgyExport
   ( lexurgyPrelude
+  , lexurgyDefaultRules
   ) where
 
 import Prelude
@@ -14,8 +15,8 @@ import qualified Data.Set as Set
 import Data.Set (Set)
 import Data.Char (chr, ord)
 import qualified Data.Foldable
-import MyLib.LexurgyTypes
-import MyLib.LexurgyInstances ()
+import HumanLanguage.LexurgyTypes
+import HumanLanguage.LexurgyInstances ()
 
 featuresMap :: IntMap LexurgyMeaning
 featuresMap = IntMap.fromList $
@@ -149,7 +150,7 @@ c <: t = T.cons c t
 
 -- Helpers for rendering
 posText :: PrePost -> Text
-posText Pre = "(before)"
+posText Pre = " (before)"
 posText Post = "" -- intentionally left blank for after
 
 -- space-separated feature list
@@ -243,4 +244,13 @@ lexurgyPrelude = T.unlines
   [ "# Lexurgy prelude definitions"
   , lexurgyFeatureDeclarations
   , lexurgyDefinitions
+  ]
+
+lexurgyDefaultRules :: Text
+lexurgyDefaultRules = T.unlines
+  [ "# Default phonological rules for Old Doll from modern English input"
+  , "# Example rules - customize as needed"
+  , ""
+  , "assimilate-place:"
+  , "  [place] => [alveolar]"
   ]

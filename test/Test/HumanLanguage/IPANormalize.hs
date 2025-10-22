@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.MyLib.IPANormalize (tests) where
+module Test.HumanLanguage.IPANormalize (tests) where
 
 import Prelude (String, ($), not)
 import Test.Tasty
@@ -8,7 +8,7 @@ import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 import Data.Text qualified as T
 
-import MyLib.IPANormalize (normalizeIpaText)
+import HumanLanguage.IPANormalize (normalizeIpaText)
 
 tests :: TestTree
 tests = testGroup "IPANormalize"

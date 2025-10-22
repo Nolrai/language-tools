@@ -75,17 +75,16 @@ library
 
     -- Modules exported by the library.
     exposed-modules:
-        , MyLib
-        , MyLib.Entry
-        , MyLib.EntryParser
-        , MyLib.EnumerateGeneric
-        , MyLib.IPA
-        , MyLib.IPANormalize
-        , MyLib.LexurgyExport
-        , MyLib.LexurgyInstances
-        , MyLib.LexurgyTypes
-        , MyLib.PrintToLexurgy
-        , MyLib.PrintToSCA2
+        , HumanLanguage.Entry
+        , HumanLanguage.EntryParser
+        , HumanLanguage.EnumerateGeneric
+        , HumanLanguage.IPA
+        , HumanLanguage.IPANormalize
+        , HumanLanguage.LexurgyExport
+        , HumanLanguage.LexurgyInstances
+        , HumanLanguage.LexurgyTypes
+        , HumanLanguage.PrintToLexurgy
+        , HumanLanguage.PrintToSCA2
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -148,14 +147,14 @@ test-suite language-tools-test
     -- Base language which the package is written in.
     other-modules:
         Test.MyLib
-        Test.MyLib.EntryParser
-        Test.MyLib.LexurgyExport
-        Test.MyLib.LexurgyInstances
-        Test.MyLib.IPA
-        Test.MyLib.IPANormalize
-        Test.MyLib.PrintToLexurgy
-        Test.MyLib.PrintToSCA2
-        Test.MyLib.PrintToLexurgy
+        Test.HumanLanguage.EntryParser
+        Test.HumanLanguage.LexurgyExport
+        Test.HumanLanguage.LexurgyInstances
+        Test.HumanLanguage.IPA
+        Test.HumanLanguage.IPANormalize
+        Test.HumanLanguage.PrintToLexurgy
+        Test.HumanLanguage.PrintToSCA2
+        Test.HumanLanguage.PrintToLexurgy
     default-language: GHC2024
 
     -- Modules included in this executable, other than Main.

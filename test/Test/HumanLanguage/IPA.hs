@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.MyLib.IPA (tests) where
+module Test.HumanLanguage.IPA (tests) where
 
 import Test.Tasty
 import Test.Tasty.HUnit
 
 tests :: TestTree
-tests = testGroup "MyLib.IPA"
+tests = testGroup "HumanLanguage.IPA"
   [ testCase "placeholder: IPA utilities" $
       assertBool "placeholder" True
   ]

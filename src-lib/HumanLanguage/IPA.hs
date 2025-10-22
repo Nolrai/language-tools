@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module MyLib.IPA where
+module HumanLanguage.IPA where
 
 import Data.Text (Text)
 import qualified Data.Text as T

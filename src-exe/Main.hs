@@ -1,18 +1,22 @@
-{-# LANGUAGE NoImplicitPrelude, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Main where
 
-import Data.Text
-import Data.Text.IO hiding (writeFile)
-import Data.Text.Encoding (encodeUtf8)
-import System.IO (IO, FilePath)
-import System.Environment
-import System.Exit (exitSuccess)
-import MyLib (parseFile, intoSCA2, intoLexurgy, lexurgyPrelude)
-import Prelude ((==))
 import Data.ByteString (writeFile)
 import Data.Function (($))
 import Data.Monoid ((<>))
+import Data.Text
+import Data.Text.Encoding (encodeUtf8)
+import Data.Text.IO hiding (writeFile)
+import HumanLanguage.EntryParser (parseFile)
+import HumanLanguage.LexurgyExport (lexurgyDefaultRules, lexurgyPrelude)
+import HumanLanguage.PrintToLexurgy (intoLexurgy)
+import HumanLanguage.PrintToSCA2 (intoSCA2)
+import System.Environment
+import System.Exit (exitSuccess)
+import System.IO (FilePath, IO)
+import Prelude ((==))
 
 main :: IO ()
 main = do
@@ -29,7 +33,8 @@ main = do
 
   putStrLn "writing lexurgy files..."
   putStrLn $ "writing lexurgy definitions to: " <> prefix <> ".sc"
-  writeFile (unpack (prefix <> ".lsc")) (encodeUtf8 lexurgyPrelude)
+  let lscContents = encodeUtf8 $ lexurgyPrelude <> "\n" <> lexurgyDefaultRules
+  writeFile (unpack (prefix <> ".lsc")) lscContents
   putStrLn $ "writing word list to: " <> prefix <> ".wl"
   writeFile (unpack (prefix <> ".wli")) $ intoLexurgy result
   exitSuccess

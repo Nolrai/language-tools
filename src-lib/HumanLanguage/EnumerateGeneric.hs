@@ -3,8 +3,28 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module MyLib.EnumerateGeneric
+-- | Generic enumeration helpers.
+-- |
+-- | The module provides:
+-- |  * `Enumerable` — a Generic-based source of all values for an ADT (as a Vector).
+-- |  * `makeEnumOps` — build efficient (toEnum, fromEnum, succ, pred) operations
+-- |    from a precomputed Vector of values.
+-- |
+-- | Important semantics note:
+-- |  - succ/pred produced by the current helpers are *saturating*: calling `succ`
+-- |    on the last element returns the last element; calling `pred` on the first
+-- |    element returns the first element. This is intentional and the default
+-- |    behavior of `makeEnumOps` (so tests and call sites expect saturation).
+-- |  - toEnum/fromEnum still perform bounds-checking and will error if toEnum is
+-- |    called with an out-of-range index.
+-- |
+-- | If you prefer strict Enum semantics (succ/pred error at bounds) you can
+-- | replace uses of `makeEnumOps` with a custom wrapper that uses `toEnum`
+-- |/`fromEnum` for succ/pred.
+
+module HumanLanguage.EnumerateGeneric
   ( Enumerable(..)
+  , GEnumerable(..)
   , buildIndex
   , toEnumFromVec
   , fromEnumUsingMap

@@ -1,4 +1,4 @@
-module MyLib.LexurgyTypes
+module HumanLanguage.LexurgyTypes
   ( Feature(..)
   , VowelFeature(..)
   , Height(..)

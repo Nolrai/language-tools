@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.MyLib.EntryParser (tests) where
+module Test.HumanLanguage.EntryParser (tests) where
 
 import Prelude (IO, ($), String, not)
 import Control.Monad.Except (runExcept)
@@ -15,8 +15,8 @@ import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 import Data.List qualified as List
 
-import MyLib.Entry (Entry(..), entryRank, entrySpelling, entryLines, cases, ipa)
-import MyLib.EntryParser (parseFile, Token(..), tokenString, IpaType(..))
+import HumanLanguage.Entry (Entry(..), entryRank, entrySpelling, entryLines, cases, ipa)
+import HumanLanguage.EntryParser (parseFile, Token(..), tokenString, IpaType(..))
 import Control.Exception (SomeException, try)
 import Control.Applicative (Applicative(..))
 

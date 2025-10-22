@@ -1,4 +1,4 @@
-module MyLib.IPANormalize
+module HumanLanguage.IPANormalize
   ( presentationVariants
   , normalizeIpaChar
   , normalizeIpaText

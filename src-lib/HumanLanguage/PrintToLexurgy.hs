@@ -2,12 +2,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module MyLib.PrintToSCA2 (intoSCA2) where
+module HumanLanguage.PrintToLexurgy (intoLexurgy) where
 
--- Module: MyLib.PrintToSCA2
--- Summary: Conversion of parsed Entries to SCA² ByteString.
+-- Module: HumanLanguage.PrintToLexurgy
+-- Summary: Conversion of parsed Entries to Lexurgy ByteString.
 --
--- This module produces a UTF-8 encoded ByteString suitable for SCA².
+-- This module produces a UTF-8 encoded ByteString suitable for Lexurgy.
 -- For now the conversion is a simple textual formatting.
 
 import Data.ByteString (ByteString)
@@ -17,18 +17,18 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Data.List as List
 import Data.Semigroup (Semigroup(..))
 
-import MyLib.Entry (Entry(..), Line(..), Case(..))
+import HumanLanguage.Entry (Entry(..), Line(..), Case(..))
 import Data.Function (($))
 
--- | Convert parsed entries into SCA² ByteString output.
+-- | Convert parsed entries into Lexurgy ByteString output.
 -- the output is UTF-8 encoded text
-intoSCA2 :: [Entry] -> ByteString
-intoSCA2 entries =
+intoLexurgy :: [Entry] -> ByteString
+intoLexurgy entries =
   let txt = T.intercalate "\n\n" (List.map fromEntry entries)
   in encodeUtf8 txt
 
--- a SCA² item consists of an ipa transcription and optional notes
--- each entry converts into one or more SCA² items
+-- a Lexurgy item consists of an ipa transcription and optional notes
+-- each entry converts into one or more Lexurgy items
 -- items are separated by newlines
 -- entries are separated by double newlines
 
@@ -43,6 +43,6 @@ fromLine spelling Line{..} =
 fromCase :: Text -> [Text] -> Case -> Text
 fromCase spelling lineNotes Case{..} =
   let notesAll = caseNotes <> lineNotes
-      -- notes can contain "/" which SCA² interprets as a separator, so replace with "["
+      -- notes can contain "/" which Lexurgy interprets as a separator, so replace with "["
       notesText = T.replace "/" "[" $ if List.null notesAll then "" else " (" <> T.intercalate ", " notesAll <> ")"
-  in ipa <> " ‣ " <> "Gloss: " <> spelling <> notesText
+  in ipa <> "\t(" <> "Gloss: " <> spelling  <> ", " <> notesText <> ")"

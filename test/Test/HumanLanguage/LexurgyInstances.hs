@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, TypeApplications, AllowAmbiguousTypes #-}
 
-module Test.MyLib.LexurgyInstances (tests) where
+module Test.HumanLanguage.LexurgyInstances (tests) where
 
 import Prelude
 import Control.Exception (try, evaluate, SomeException)
@@ -9,10 +9,10 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Data.Vector (Vector, (!))
 import qualified Data.Vector as V
-import MyLib.EnumerateGeneric
+import HumanLanguage.EnumerateGeneric
 
-import MyLib.LexurgyInstances()
-import MyLib.LexurgyTypes
+import HumanLanguage.LexurgyInstances()
+import HumanLanguage.LexurgyTypes
   ( Feature
   , VowelFeature
   , ConsonantFeature

@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
--- Module: MyLib.Entry
+-- Module: HumanLanguage.Entry
 -- Summary: Core data types for the language-tools package.
 --
 -- This module defines the small, plain data structures used across the
@@ -11,7 +11,7 @@
 --  - NoImplicitPrelude is used to keep imports explicit and make dependencies
 --    obvious; this file only depends on Data.Text for the textual fields.
 --  - Keep these records stable: backwards-compatible changes are preferred.
-module MyLib.Entry
+module HumanLanguage.Entry
   ( Entry(..)
   , Line(..)
   , Case(..)

@@ -1,4 +1,4 @@
-module Test.MyLib.LexurgyExport (tests) where
+module Test.HumanLanguage.LexurgyExport (tests) where
 
 import Prelude
 import Test.Tasty

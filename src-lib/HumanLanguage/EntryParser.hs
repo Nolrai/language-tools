@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GADTs #-}
 -- |
--- Module: MyLib.EntryParser
+-- Module: HumanLanguage.EntryParser
 -- Summary: Lexing and parsing for entries.
 --
 -- Responsibilities:
@@ -18,7 +18,7 @@
 --  - ipaChars is a whitelist chosen to avoid accepting arbitrary input inside
 --    IPA spans; update it if you need to support more unicode categories.
 
-module MyLib.EntryParser
+module HumanLanguage.EntryParser
   ( parseFile
   , parseFileFull
   , parseEntry
@@ -29,8 +29,8 @@ module MyLib.EntryParser
   , IpaType(..)
   ) where
 
-import MyLib.Entry (Entry(..), Line(..), Case(..))
-import MyLib.IPA (isIPAChar)
+import HumanLanguage.Entry (Entry(..), Line(..), Case(..))
+import HumanLanguage.IPA (isIPAChar)
 
 import Prelude
 
