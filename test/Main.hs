@@ -1,7 +1,22 @@
 module Main (main) where
+import Test.Tasty
 
-import Test.Tasty (defaultMain)
-import Test.MyLib (tests)
+import Test.HumanLanguage.EntryParser qualified as EntryParser
+import Test.HumanLanguage.IPANormalize qualified as IPANormalize
+import Test.HumanLanguage.LexurgyExport qualified as LexurgyExport
+import Test.HumanLanguage.LexurgyInstances qualified as LexurgyInstances
+import Test.HumanLanguage.PrintToLexurgy qualified as PrintToLexurgy
 
 main :: IO ()
 main = defaultMain tests
+
+tests :: TestTree
+tests = testGroup "MyLib tests"
+  [ EntryParser.tests
+  , IPANormalize.tests
+  , testGroup "Lexurgy Modules tests"
+      [ LexurgyInstances.tests
+      , LexurgyExport.tests
+      , PrintToLexurgy.tests
+      ]
+  ]
