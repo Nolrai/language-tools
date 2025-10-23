@@ -30,9 +30,12 @@ tests = testGroup "LexurgyExport"
             (Set.null inconsistencies)
 
   , testCase "We can find lexurgy" $ do
-    runLexurgy ["--version"]
+    runLexurgy ["-h"]
 
   , withPreludeFile $ testCase "lexurgy parses the prelude" $ do
+      contents <- B.readFile preludeFilePath
+      let fileLength = B.length contents
+      putStrLn $ "Prelude contents are :" <> show fileLength <> " bytes long."
       runLexurgy ["sc", preludeFilePath]
 
   ]
@@ -54,3 +57,7 @@ runLexurgy args = do
     ExitFailure code -> do
       putStrLn $ "Lexurgy exited with code: " <> show code
       putStrLn stderr
+      assertFailure
+        $ "Lexurgy execution failed with code: " <> show code
+        <> "\n\tand stderr: \n" <> stderr
+        <> "\n\tand stdout: \n" <> stdout
