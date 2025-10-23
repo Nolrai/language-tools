@@ -10,7 +10,7 @@ import Data.Text
 import Data.Text.Encoding (encodeUtf8)
 import Data.Text.IO hiding (writeFile)
 import HumanLanguage.EntryParser (parseFile)
-import HumanLanguage.LexurgyExport (lexurgyPrelude)
+import HumanLanguage.LexurgyExport (lexurgyPrelude, lexurgyPath)
 import HumanLanguage.PrintToLexurgy (intoLexurgy)
 import System.Environment
 import System.Exit (exitSuccess, ExitCode (..), exitWith)
@@ -80,6 +80,3 @@ exceptionHandler ex = do
   putStrLn . ("getArgs returned: " <>) . show =<< getArgs
 
   exitWith (ExitFailure 1)
-
-lexurgyPath :: FilePath
-lexurgyPath = "/home/chris/myprojects/language-tools/lexurgy"

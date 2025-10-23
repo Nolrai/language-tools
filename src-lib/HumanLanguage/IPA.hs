@@ -21,11 +21,12 @@ ipaChars = T.concat
   [ "IꞮ" -- UppercaseLetter
   , "abcdefghijklmnoprstuvwxyz" -- english lowercase letters (q omitted)
   , "äæçðøŋɐɑɒɔɘəɚɛɜɝɞɪɫɯɵɹɾʃʈʉʊʌʍʒθ" -- other letters
+  , "ɨɐœɶɤ" -- other vowels not used in English
   , "ʰʱˈːˑ" -- modifier letters
   , "ʔ" -- glottal stop
   , T.pack "\771\776\778\794\798\799\800\805\809\810\815" -- NonSpacingMark codepoints
   , T.pack "\742\743" -- ModifierSymbol
-  , "." -- SylableBreak
+  , "." -- SyllableBreak
   , "()" -- parentheses for optional segments
   ]
 
