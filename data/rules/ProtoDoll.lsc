@@ -1,2 +1,44 @@
-erase-place:
-  [place] => [dentalalveolar]
+# gloss
+class gloss {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,Æ}
+
+american-eye:
+  aɪ => ai
+  eɪ => ei
+
+pin-pen-merger:
+  ɛ => ɪ
+
+glottalize:
+  j => i
+  w => u
+  [approximant] => l
+  {[stop], [trill], [tap]} => ʔ
+  [-voiced fricative] => h
+  [+voiced] => m
+
+seperate-aspiration:
+  ʔʰ => ʔh
+
+simplify-nasals:
+  [nasal] => ŋ
+
+# cluster-simplification:
+#   [-syllabic] => * / [-syllabic] _
+#   ʔ [!height] => ʔ
+#   then
+#     [-syllabic] => * / [-syllabic] _
+#     ʔ [!height] => ʔ
+#   then
+#     [-syllabic] => * / [-syllabic] _
+#     ʔ [!height] => ʔ
+#   then
+#     [-syllabic] => * / [-syllabic] _
+#     ʔ [!height] => ʔ
+#   then
+#     ʔ [!height] => ʔ
+#     [-syllabic] => * / [-syllabic] _
+
+
+# derounding:
+#   {[nearback], [back]} => [+rounded]
+#   {[front], [nearfront]} => [-rounded]

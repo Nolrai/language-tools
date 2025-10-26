@@ -19,41 +19,59 @@ import qualified Data.Foldable
 import HumanLanguage.LexurgyTypes
 import HumanLanguage.LexurgyInstances ()
 
+
+
 featuresMap :: IntMap LexurgyMeaning
 featuresMap = IntMap.fromList $
-    -- vowels (height/back/round)
-    [ mkVowel 'a'   [Height Open,      Backness Front,    Rounding False]
-    , mkVowel 'ä'   [Height Open,      Backness Central,  Rounding False]
-    , mkVowel 'æ'   [Height NearOpen,  Backness Front,    Rounding False]
-    , mkVowel 'e'   [Height CloseMid,  Backness Front,    Rounding False]
-    , mkVowel 'ɛ'   [Height OpenMid,   Backness Front,    Rounding False]
-    , mkVowel 'ø'   [Height CloseMid,  Backness Front,    Rounding True ]
-    , mkVowel 'ɨ'   [Height Close,     Backness Central,  Rounding False]
-    , mkVowel 'ɐ'   [Height NearOpen,  Backness Central,  Rounding False]
-    , mkVowel 'œ'   [Height OpenMid,   Backness Front,    Rounding True ]
-    , mkVowel 'ɶ'   [Height Open,      Backness Front,    Rounding True ]
-    , mkVowel 'ɤ'   [Height CloseMid,  Backness Back,     Rounding False]
-    , mkVowel 'i'   [Height Close,     Backness Front,    Rounding False]
-    , mkVowel 'Ɪ'   [Height NearClose, Backness NearFront, Rounding False]
-    , mkVowel 'ɪ'   [Height NearClose, Backness NearFront, Rounding False]
-    , mkVowel 'ɘ'   [Height CloseMid,  Backness Central,  Rounding False]
-    , mkVowel 'ə'   [Height Mid,       Backness Central,  Rounding False]
-    , mkVowel 'ɚ'   [Height Mid,       Backness Central,  Rhotic, Rounding False]
-    , mkVowel 'ɜ'   [Height OpenMid,   Backness Central,  Rounding False]
-    , mkVowel 'ɝ'   [Height OpenMid,   Backness Central,  Rhotic, Rounding False]
-    , mkVowel 'ɵ'   [Height CloseMid,  Backness Central,  Rounding True ]
-    , mkVowel 'ʉ'   [Height Close,     Backness Central,  Rounding True ]
-    , mkVowel 'u'   [Height Close,     Backness Back,     Rounding True ]
-    , mkVowel 'ɯ'   [Height Close,     Backness Back,     Rounding False]
-    , mkVowel 'o'   [Height CloseMid,  Backness Back,     Rounding True ]
-    , mkVowel 'ɒ'   [Height Open,      Backness Back,     Rounding True ]
-    , mkVowel 'ɑ'   [Height Open,      Backness Back,     Rounding False]
-    , mkVowel 'ɔ'   [Height OpenMid,   Backness Back,     Rounding True ]
-    , mkVowel 'ʊ'   [Height NearClose, Backness NearBack,  Rounding True ]
-    , mkVowel 'ʌ'   [Height OpenMid,   Backness Back,     Rounding False]
-    , mkVowel 'ɞ'   [Height CloseMid,  Backness Central,  Rounding True ]
-    , mkVowel 'y'   [Height Close,     Backness Front,    Rounding True ]
+
+    -- Vowel conventions used in this file:
+    --  * 'ä' is used here to represent an open/central vowel for readability.
+    --  * 'ø' is used for the close‑mid front rounded vowel; 'œ' for open‑mid front rounded.
+    --  * 'ɞ' (open‑mid central rounded) and 'ɵ' (close‑mid central rounded) are included
+    --    with central placement and rounding as appropriate.
+    --  * 'ɪ' is the canonical IPA near‑close front vowel (avoid using 'Ɪ').
+    -- * 'ʊ' is the canonical IPA near‑close near‑back vowel (avoid using 'ᴜ').
+    --  These are project conventions chosen for clarity; if you add or change a
+    --  vowel entry, please document the rationale here.
+
+    -- vowels (height/back/rounding/(rhotic))
+    [ mkVowel 'a'   [Height Open,      Backness Front,      Rounding False]
+    , mkVowel 'ä'   [Height Open,      Backness Central,    Rounding False]
+    , mkVowel 'æ'   [Height NearOpen,  Backness Front,      Rounding False]
+    , mkVowel 'e'   [Height CloseMid,  Backness Front,      Rounding False]
+    , mkVowel 'ɛ'   [Height OpenMid,   Backness Front,      Rounding False]
+    , mkVowel 'ø'   [Height CloseMid,  Backness Front,      Rounding True ]
+    , mkVowel 'ɨ'   [Height Close,     Backness Central,    Rounding False]
+    , mkVowel 'ɐ'   [Height NearOpen,  Backness Central,    Rounding False]
+    , mkVowel 'œ'   [Height OpenMid,   Backness Front,      Rounding True ]
+    , mkVowel 'ɶ'   [Height Open,      Backness Front,      Rounding True ]
+    , mkVowel 'ɤ'   [Height CloseMid,  Backness Back,       Rounding False]
+    , mkVowel 'i'   [Height Close,     Backness Front,      Rounding False]
+    , mkVowel 'ɪ'   [Height NearClose, Backness NearFront,  Rounding False]
+    , mkVowel 'ɘ'   [Height CloseMid,  Backness Central,    Rounding False]
+    , mkVowel 'ə'   [Height Mid,       Backness Central,    Rounding False]
+    , mkVowel 'ɚ'   [Height Mid,       Backness Central,    Rounding False, Rhotic]
+    , mkVowel 'ɜ'   [Height OpenMid,   Backness Central,    Rounding False]
+    , mkVowel 'ɝ'   [Height OpenMid,   Backness Central,    Rounding True, Rhotic]
+    , mkVowel 'ɵ'   [Height CloseMid,  Backness Central,    Rounding True ]
+    , mkVowel 'ʉ'   [Height Close,     Backness Central,    Rounding True ]
+    , mkVowel 'u'   [Height Close,     Backness Back,       Rounding True ]
+    , mkVowel 'ɯ'   [Height Close,     Backness Back,       Rounding False]
+    , mkVowel 'o'   [Height CloseMid,  Backness Back,       Rounding True ]
+    , mkVowel 'ɒ'   [Height Open,      Backness Back,       Rounding True ]
+    , mkVowel 'ɑ'   [Height Open,      Backness Back,       Rounding False]
+    , mkVowel 'ɔ'   [Height OpenMid,   Backness Back,       Rounding True ]
+    , mkVowel 'ʊ'   [Height NearClose, Backness NearBack,   Rounding True ]
+    , mkVowel 'ʌ'   [Height OpenMid,   Backness Back,       Rounding False]
+    , mkVowel 'ɞ'   [Height OpenMid,   Backness Central,    Rounding True ]
+    , mkVowel 'y'   [Height Close,     Backness Front,      Rounding True ]
     ] ++
+    -- consonant conventions used in this file:
+    --  * 'c' is used for the voiceless palatal stop (avoid using 'ɟ' for the voiced counterpart).
+    --  * 'ɾ' is used for the alveolar tap (avoid using 'ɽ' for the retroflex tap).
+    --  * 'ʍ' is used for the voiceless labiovelar approximant (avoid using 'w' with voiceless diacritic).
+    -- These are project conventions chosen for clarity; if you add or change a
+    -- consonant entry, please document the rationale here
     -- consonants (place/manner/voice)
     [ mkConsonant 'p' [Place Bilabial,      Manner Stop,                 Voice Voiceless]
     , mkConsonant 'b' [Place Bilabial,      Manner Stop,                 Voice Voiced   ]
@@ -75,15 +93,15 @@ featuresMap = IntMap.fromList $
     , mkConsonant 'ç' [Place Palatal,       Manner Fricative,            Voice Voiceless]
     , mkConsonant 'x' [Place Velar,         Manner Fricative,            Voice Voiceless]
     , mkConsonant 'h' [Place Glottal,       Manner Fricative,            Voice Voiceless]
-    , mkConsonant 'θ' [Place Dental,        Manner Fricative,            Voice Voiceless]
-    , mkConsonant 'ð' [Place Dental,        Manner Fricative,            Voice Voiced   ]
+    , mkConsonant 'θ' [Place InterDental,   Manner Fricative,            Voice Voiceless]
+    , mkConsonant 'ð' [Place InterDental,   Manner Fricative,            Voice Voiced   ]
     , mkConsonant 'l' [Place Alveolar,      Manner LateralApproximant,   Voice Voiced   ]
     , mkConsonant 'ɫ' [Place Alveolar,      Manner LateralApproximant,   Voice Voiced   , Velarization]
     , mkConsonant 'ɹ' [Place Alveolar,      Manner Approximant,          Voice Voiced   ]
     , mkConsonant 'r' [Place Alveolar,      Manner Trill,                Voice Voiced   ]
     , mkConsonant 'ɾ' [Place Alveolar,      Manner Tap,                  Voice Voiced   ]
     , mkConsonant 'w' [Place Labiovelar,    Manner Approximant,          Voice Voiced   ]
-    , mkConsonant 'ʍ' [Place Labiovelar,    Manner FricativeApproximant, Voice Voiceless]
+    , mkConsonant 'ʍ' [Place Labiovelar,    Manner Approximant,          Voice Voiceless]
     , mkConsonant 'j' [Place Palatal,       Manner Approximant,          Voice Voiced   ]
     , mkConsonant 'ʔ' [Place Glottal,       Manner Stop,                 Voice Voiceless]
     ] ++
@@ -100,16 +118,16 @@ featuresMap = IntMap.fromList $
     , meta ')'
     ] ++
     -- combining marks
-    [ diaInt 771 [Nazalized] Post                -- U+0303 COMBINING TILDE : nasalization
+    [ diaInt 771 [Nasalized] Post                             -- U+0303 COMBINING TILDE : nasalization
     , diaInt 776 [VowelFeature Centralized] Post              -- U+0308 COMBINING DIAERESIS : centralized / centralized vowel
-    , diaInt 805 [ConsonantFeature (Voice Voiceless)] Post    -- U+0310 COMBINING RING BELOW : voiceless
+    , diaInt 805 [ConsonantFeature (Voice Voiceless)] Post    -- U+0325 COMBINING RING BELOW : voiceless
     , diaInt 794 [ConsonantFeature Apical] Post               -- U+031A COMBINING LEFT ANGLE ABOVE : apical (tongue-tip) marker
     , diaInt 798 [VowelFeature Lowered] Post                  -- U+031E COMBINING DOWN TACK BELOW : lowered (more open)
     , diaInt 799 [VowelFeature Advanced] Post                 -- U+031F COMBINING PLUS SIGN BELOW : advanced / fronted
     , diaInt 800 [VowelFeature Retracted] Post                -- U+0320 COMBINING MINUS SIGN BELOW : retracted / backed
-    , diaInt 809 [Syllabic True] Post             -- U+0329 COMBINING VERTICAL LINE BELOW : syllabic
+    , diaInt 809 [Syllabic True] Post                         -- U+0329 COMBINING VERTICAL LINE BELOW : syllabic
     , diaInt 810 [ConsonantFeature (Place Dental)] Post       -- U+032A COMBINING BRIDGE BELOW : dental
-    , diaInt 815 [Syllabic False] Post              -- U+032F COMBINING INVERTED BREVE BELOW : non-syllabic
+    , diaInt 815 [Syllabic False] Post                        -- U+032F COMBINING INVERTED BREVE BELOW : non-syllabic
     ]
 
   where
@@ -135,6 +153,7 @@ lexurgyFeatureDeclarations = T.unlines
   , "Feature +advanced"
   , "Feature +retracted"
   , "Feature +lowered"
+  , "Feature +rhotic"
   , "# Consonant features"
   , "Feature place(bilabial, labiodental, interdental, dental, dentalalveolar, alveolar, postalveolar, retroflex, palatal, velar, labiovelar, glottal)"
   , "Feature manner(stop, nasal, fricative, approximant, lateralapproximant, trill, tap, fricativeapproximant)"
@@ -151,6 +170,24 @@ lexurgyFeatureDeclarations = T.unlines
 
 lexurgyDefinitions :: Text
 lexurgyDefinitions = T.unlines $ map (uncurry showLexurgyMeaning) $ IntMap.toList featuresMap
+
+lexurgyClassDefinitions :: Text
+lexurgyClassDefinitions = T.unlines
+  [ "# Lexurgy class definitions"
+  , "Class vowel {" <> T.intercalate ", " (map (T.singleton . chr) vowelCodes) <> "}"
+  , "Class consonant {" <> T.intercalate ", " (map (T.singleton . chr) consonantCodes) <> "}"
+  ]
+  where
+    vowelCodes = [ code | (code, LexurgySymbol fs) <- IntMap.toList featuresMap,
+                          Data.Foldable.any isVowelFeature (Set.toList fs) ]
+    consonantCodes = [ code | (code, LexurgySymbol fs) <- IntMap.toList featuresMap,
+                              Data.Foldable.any isConsonantFeature (Set.toList fs) ]
+    isVowelFeature :: Feature -> Bool
+    isVowelFeature (VowelFeature _) = True
+    isVowelFeature _                 = False
+    isConsonantFeature :: Feature -> Bool
+    isConsonantFeature (ConsonantFeature _) = True
+    isConsonantFeature _                     = False
 
 (<:) :: Char -> Text -> Text
 c <: t = T.cons c t
@@ -237,7 +274,7 @@ showFeature f = case f of
     Velarization -> "+velarized"
     Unreleased -> "+unreleased"
     Apical -> "+apical"
-  Nazalized -> "+nasalized"
+  Nasalized -> "+nasalized"
   Floating ff -> case ff of
     Aspiration -> "+aspiration"
     BreathyVoice -> "+breathyvoice"
@@ -257,6 +294,7 @@ lexurgyPrelude = T.unlines
   [ "# Lexurgy prelude definitions"
   , lexurgyFeatureDeclarations
   , lexurgyDefinitions
+  , lexurgyClassDefinitions
   ]
 
 lexurgyPath :: FilePath

@@ -21,7 +21,7 @@ import Data.Set (Set)
 data Feature
   = VowelFeature VowelFeature
   | ConsonantFeature ConsonantFeature
-  | Nazalized
+  | Nasalized
   | Floating FloatingFeature
   | Syllabic Bool
   | TieBar
@@ -87,4 +87,4 @@ data LexurgyMeaning
   = LexurgySymbol (Set Feature)
   | LexurgyDiacritic (Set Feature) PrePost
   | LexurgyMeta
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord, Generic)

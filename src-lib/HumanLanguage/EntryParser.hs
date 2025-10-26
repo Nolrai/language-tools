@@ -31,6 +31,7 @@ module HumanLanguage.EntryParser
 
 import HumanLanguage.Entry (Entry(..), Line(..), Case(..))
 import HumanLanguage.IPA (isIPAChar)
+import HumanLanguage.IPANormalize
 
 import Prelude
 
@@ -130,7 +131,7 @@ toTokens = go NoContext
           case matchEnding c of
             Just endType ->
               if endType == ipaType
-                then (Ipa ipaType (T.reverse sofar) :) <$> go NoContext cs
+                then (Ipa ipaType (normalizeIpaText (T.reverse sofar)) :) <$> go NoContext cs
                 else throwError $ "ipa ended by wrong delimiter: " <> T.singleton c <> " in " <> txt
             Nothing ->
               if isIPAChar c

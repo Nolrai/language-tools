@@ -18,7 +18,6 @@ import qualified Data.List as List
 import Data.Semigroup (Semigroup(..))
 
 import HumanLanguage.Entry (Entry(..), Line(..), Case(..))
-import Data.Function (($))
 
 -- | Convert parsed entries into Lexurgy ByteString output.
 -- the output is UTF-8 encoded text
@@ -43,6 +42,8 @@ fromLine spelling Line{..} =
 fromCase :: Text -> [Text] -> Case -> Text
 fromCase spelling lineNotes Case{..} =
   let notesAll = caseNotes <> lineNotes
-      -- notes can contain "/" which Lexurgy interprets as a separator, so replace with "["
-      notesText = T.replace "/" "[" $ if List.null notesAll then "" else " (" <> T.intercalate ", " notesAll <> ")"
-  in ipa <> "\t(" <> "Gloss: " <> spelling  <> ", " <> notesText <> ")"
+      notesText = if List.null notesAll then "" else " (" <> T.intercalate ")X(" notesAll <> ")"
+      notesTextFinal = if T.null notesText then "" else " NOTES " <> notesText
+  -- I use uppercase GLOSS to erase the glosses
+  in T.toUpper ("X " <> spelling  <> notesTextFinal <> " X") <> "\t" <> ipa
+
