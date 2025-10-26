@@ -1,0 +1,23 @@
+{
+  "name": "lsc-language",
+  "displayName": "LSC Language",
+  "publisher": "your-name",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "description": "Language configuration for .lsc files (line comment = '#')",
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "lsc",
+        "aliases": ["LSC", "lsc"],
+        "extensions": [".lsc"],
+        "configuration": "./language-configuration.json"
+      }
+    ]
+  }
+}

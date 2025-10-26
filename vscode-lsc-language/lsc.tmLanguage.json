@@ -1,0 +1,30 @@
+{
+  "scopeName": "source.lsc",
+  "name": "LSC",
+  "patterns": [
+    {
+      "name": "comment.line.number-sign.lsc",
+      "match": "#.*$"
+    },
+    {
+      "name": "keyword.control.lsc",
+      "match": "\\b(?:class|then|else|symbol|feature|diacritic)\\b"
+    },
+    {
+      "name": "entity.name.section.rule.lsc",
+      "match": "^[ \\t]*[a-zA-Z0-9_-]+:"
+    },
+    {
+      "name": "punctuation.definition.braces.lsc",
+      "match": "[\\{\\}]"
+    },
+
+    {
+      "name": "keyword.operator.lsc",
+      "match": "(=>|\\/)"
+    }
+  ],
+  "repository": {},
+  "foldingStartMarker": "^[ \\t]*[a-zA-Z0-9_-]+:",
+  "foldingStopMarker": "^[ \\t]*$"
+}
