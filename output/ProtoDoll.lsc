@@ -1,0 +1,147 @@
+# Lexurgy prelude definitions
+# Feature declarations for lexurgy
+Feature syllabic
+# Vowel features
+Feature height(close, nearclose, closemid, mid, openmid, nearopen, open)
+Feature backness(front, nearfront, central, nearback, back)
+Feature rounded
+Feature nasalized
+Feature +centralized
+Feature +advanced
+Feature +retracted
+Feature +lowered
+Feature +rhotic
+# Consonant features
+Feature place(bilabial, labiodental, interdental, dental, dentalalveolar, alveolar, postalveolar, retroflex, palatal, velar, labiovelar, glottal)
+Feature manner(stop, nasal, fricative, approximant, lateralapproximant, trill, tap, fricativeapproximant)
+Feature voiced
+Feature +velarized
+Feature +unreleased
+Feature +apical
+# Floating features
+Feature +aspiration
+Feature +breathyvoice
+Feature stress(primarystress, secondarystress, nostress)
+Feature length(half, full, long)
+
+# ( (meta)
+# ) (meta)
+# . (meta)
+symbol a [open front -rounded +syllabic]
+symbol b [bilabial stop +voiced -syllabic]
+symbol c [palatal stop -voiced -syllabic]
+symbol d [alveolar stop +voiced -syllabic]
+symbol e [closemid front -rounded +syllabic]
+symbol f [labiodental fricative -voiced -syllabic]
+symbol g [velar stop +voiced -syllabic]
+symbol h [glottal fricative -voiced -syllabic]
+symbol i [close front -rounded +syllabic]
+symbol j [palatal approximant +voiced -syllabic]
+symbol k [velar stop -voiced -syllabic]
+symbol l [alveolar lateralapproximant +voiced -syllabic]
+symbol m [bilabial nasal +voiced -syllabic]
+symbol n [alveolar nasal +voiced -syllabic]
+symbol o [closemid back +rounded +syllabic]
+symbol p [bilabial stop -voiced -syllabic]
+symbol r [alveolar trill +voiced -syllabic]
+symbol s [alveolar fricative -voiced -syllabic]
+symbol t [alveolar stop -voiced -syllabic]
+symbol u [close back +rounded +syllabic]
+symbol v [labiodental fricative +voiced -syllabic]
+symbol w [labiovelar approximant +voiced -syllabic]
+symbol x [velar fricative -voiced -syllabic]
+symbol y [close front +rounded +syllabic]
+symbol z [alveolar fricative +voiced -syllabic]
+symbol ä [open central -rounded +syllabic]
+symbol æ [nearopen front -rounded +syllabic]
+symbol ç [palatal fricative -voiced -syllabic]
+symbol ð [interdental fricative +voiced -syllabic]
+symbol ø [closemid front +rounded +syllabic]
+symbol ŋ [velar nasal +voiced -syllabic]
+symbol œ [openmid front +rounded +syllabic]
+symbol ɐ [nearopen central -rounded +syllabic]
+symbol ɑ [open back -rounded +syllabic]
+symbol ɒ [open back +rounded +syllabic]
+symbol ɔ [openmid back +rounded +syllabic]
+symbol ɘ [closemid central -rounded +syllabic]
+symbol ə [mid central -rounded +syllabic]
+symbol ɚ [mid central -rounded +rhotic +syllabic]
+symbol ɛ [openmid front -rounded +syllabic]
+symbol ɜ [openmid central -rounded +syllabic]
+symbol ɝ [openmid central +rounded +rhotic +syllabic]
+symbol ɞ [openmid central +rounded +syllabic]
+symbol ɤ [closemid back -rounded +syllabic]
+symbol ɨ [close central -rounded +syllabic]
+symbol ɪ [nearclose nearfront -rounded +syllabic]
+symbol ɫ [alveolar lateralapproximant +voiced +velarized -syllabic]
+symbol ɯ [close back -rounded +syllabic]
+symbol ɵ [closemid central +rounded +syllabic]
+symbol ɶ [open front +rounded +syllabic]
+symbol ɹ [alveolar approximant +voiced -syllabic]
+symbol ɾ [alveolar tap +voiced -syllabic]
+symbol ʃ [postalveolar fricative -voiced -syllabic]
+symbol ʈ [retroflex stop -voiced -syllabic]
+symbol ʉ [close central +rounded +syllabic]
+symbol ʊ [nearclose nearback +rounded +syllabic]
+symbol ʌ [openmid back -rounded +syllabic]
+symbol ʍ [labiovelar approximant -voiced -syllabic]
+symbol ʒ [postalveolar fricative +voiced -syllabic]
+symbol ʔ [glottal stop -voiced -syllabic]
+diacritic ʰ (floating) [+aspiration] 
+diacritic ʱ (floating) [+breathyvoice] 
+diacritic ˈ (before) (floating) [primarystress] 
+diacritic ː (floating) [long] 
+diacritic ˑ (floating) [half] 
+diacritic ̃ [+nasalized] 
+diacritic ̈ [+centralized] 
+diacritic ̚ [+apical] 
+diacritic ̞ [+lowered] 
+diacritic ̟ [+advanced] 
+diacritic ̠ [+retracted] 
+diacritic ̥ [-voiced] 
+diacritic ̩ [+syllabic] 
+diacritic ̪ [dental] 
+diacritic ̯ [-syllabic] 
+symbol θ [interdental fricative -voiced -syllabic]
+
+# Lexurgy class definitions
+Class vowel {a, e, i, o, u, y, ä, æ, ø, œ, ɐ, ɑ, ɒ, ɔ, ɘ, ə, ɚ, ɛ, ɜ, ɝ, ɞ, ɤ, ɨ, ɪ, ɯ, ɵ, ɶ, ʉ, ʊ, ʌ}
+Class consonant {b, c, d, f, g, h, j, k, l, m, n, p, r, s, t, v, w, x, z, ç, ð, ŋ, ɫ, ɹ, ɾ, ʃ, ʈ, ʍ, ʒ, ʔ, θ}
+
+# gloss
+class gloss {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,Æ}
+
+glottalize:
+  j => i
+  w => u
+  [approximant] => l
+  {[stop], [trill], [tap]} => ʔ
+  [-voiced fricative] => h
+  [+voiced] => m
+
+seperate-aspiration:
+  ʔʰ => ʔh
+
+simplify-nasals:
+  [nasal] => ŋ
+
+# cluster-simplification:
+#   [-syllabic] => * / [-syllabic] _
+#   ʔ [!height] => ʔ
+#   then
+#     [-syllabic] => * / [-syllabic] _
+#     ʔ [!height] => ʔ
+#   then
+#     [-syllabic] => * / [-syllabic] _
+#     ʔ [!height] => ʔ
+#   then
+#     [-syllabic] => * / [-syllabic] _
+#     ʔ [!height] => ʔ
+#   then
+#     ʔ [!height] => ʔ
+#     [-syllabic] => * / [-syllabic] _
+
+
+# derounding:
+#   {[nearback], [back]} => [+rounded]
+#   {[front], [nearfront]} => [-rounded]
