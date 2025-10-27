@@ -1,0 +1,45 @@
+name: NFC normalization check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  nfc:
+    name: Check Unicode NFC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Fail on non‑NFC files
+        run: |
+          python3 - <<'PY'
+          import unicodedata, subprocess, pathlib, sys
+          try:
+              out = subprocess.check_output(['git','ls-files','--','*.hs','*.lhs','*.lsc','*.sc','*.md','*.txt'], stderr=subprocess.DEVNULL)
+          except subprocess.CalledProcessError:
+              out = b''
+          files = [f for f in out.decode().splitlines() if f]
+          bad = []
+          for p in files:
+              try:
+                  text = pathlib.Path(p).read_text(encoding='utf-8')
+              except Exception as e:
+                  print(f"ERROR reading {p}: {e}", file=sys.stderr)
+                  bad.append(p)
+                  continue
+              if text != unicodedata.normalize('NFC', text):
+                  bad.append(p)
+          if bad:
+              print("The following files are not NFC-normalized or could not be read:", file=sys.stderr)
+              for b in bad:
+                  print("  " + b, file=sys.stderr)
+              sys.exit(1)
+          print("All checked files are NFC-normalized.")
+          PY
