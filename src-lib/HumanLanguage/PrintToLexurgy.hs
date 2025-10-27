@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module HumanLanguage.PrintToLexurgy (intoLexurgy) where
+module HumanLanguage.PrintToLexurgy (intoLexurgy, runLexurgy) where
 
 -- Module: HumanLanguage.PrintToLexurgy
 -- Summary: Conversion of parsed Entries to Lexurgy ByteString.
@@ -18,6 +18,7 @@ import qualified Data.List as List
 import Data.Semigroup (Semigroup(..))
 
 import HumanLanguage.Entry (Entry(..), Line(..), Case(..))
+import System.IO (FilePath, IO)
 
 -- | Convert parsed entries into Lexurgy ByteString output.
 -- the output is UTF-8 encoded text
@@ -46,4 +47,3 @@ fromCase spelling lineNotes Case{..} =
       notesTextFinal = if T.null notesText then "" else " NOTES " <> notesText
   -- I use uppercase GLOSS to erase the glosses
   in T.toUpper ("X " <> spelling  <> notesTextFinal <> " X") <> "\t" <> ipa
-
