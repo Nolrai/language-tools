@@ -6,13 +6,15 @@ import Test.HumanLanguage.LexurgyExport qualified as LexurgyExport
 import Test.HumanLanguage.LexurgyInstances qualified as LexurgyInstances
 import Test.HumanLanguage.PrintToLexurgy qualified as PrintToLexurgy
 import Test.Tasty
+import Test.Data.Dictionary.Utils qualified as DictionaryUtils
 
 main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
 tests =
-  testGroup
+  testGroup "All tests"
+  [ testGroup
     "HumanLanguage tests"
     [ EntryParser.tests,
       IPANormalize.tests,
@@ -23,3 +25,8 @@ tests =
           PrintToLexurgy.tests
         ]
     ]
+  , testGroup
+    "Data.Dictionary.Utils tests"
+    [ DictionaryUtils.tests
+    ]
+  ]

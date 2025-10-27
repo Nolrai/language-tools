@@ -1,6 +1,8 @@
 # gloss
 class gloss {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,Æ}
 
+# These first two rules are just to bring the word list closer to my dialect of English.
+
 american-eye:
   aɪ => ai
   eɪ => ei
@@ -8,37 +10,49 @@ american-eye:
 pin-pen-merger:
   ɛ => ɪ
 
-glottalize:
+# One of my sources uses "r" for the English rhotic r sound,
+# but I prefer to use the turned r symbol ɹ for that sound
+rhotacization:
+  r => ɹ
+
+# before applying glottalization, we need to take care of some other changes
+# that
+
+# turn semivowels into their corresponding high vowels or r-colored vowels
+vocalization:
   j => i
   w => u
+  ɹ => ɚ
+
+# turn all remaining approximants into l
+approximant-simplification:
   [approximant] => l
+
+# The speakers of ProtoDoll don't have lips or tongues, so they can't make
+# labial or coronal sounds.
+
+# Convert them to glottal sounds, but because they have a syrinx they can approximate some of the sounds with what we are going to call nasals. That is also why they can still make the full range of vowel sounds, and make nasals without using the tongue,lip, nose.
+
+# Turn all stops and fricatives into ʔ, h, or m depending on voicing and manner
+glottalize:
   {[stop], [trill], [tap]} => ʔ
   [-voiced fricative] => h
-  [+voiced] => m
+  [+voiced fricative] => m
 
+# Turn all nasals into ŋ
+unify-nasals:
+  [nasal] => ŋ
+
+# An aspirated glottal stop is really just a sequence of a glottal stop and an h
 seperate-aspiration:
   ʔʰ => ʔh
 
-simplify-nasals:
-  [nasal] => ŋ
+# insert an h between consecutive glottal stops to avoid hiatus
+glottal-stop-epenthesis:
+  ʔʔ => ʔhʔ
 
-# cluster-simplification:
-#   [-syllabic] => * / [-syllabic] _
-#   ʔ [!height] => ʔ
-#   then
-#     [-syllabic] => * / [-syllabic] _
-#     ʔ [!height] => ʔ
-#   then
-#     [-syllabic] => * / [-syllabic] _
-#     ʔ [!height] => ʔ
-#   then
-#     [-syllabic] => * / [-syllabic] _
-#     ʔ [!height] => ʔ
-#   then
-#     ʔ [!height] => ʔ
-#     [-syllabic] => * / [-syllabic] _
-
-
-# derounding:
-#   {[nearback], [back]} => [+rounded]
-#   {[front], [nearfront]} => [-rounded]
+# The speakers of ProtoDoll can't round or unround their lips, so all vowels
+# are either rounded or unrounded depending on their backness.
+vowel-derounding:
+  {[nearback], [back]} => [+rounded]
+  {[front], [nearfront]} => [-rounded]

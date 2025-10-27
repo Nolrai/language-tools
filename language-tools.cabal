@@ -164,6 +164,7 @@ test-suite language-tools-test
         Test.HumanLanguage.PrintToLexurgy
         Test.HumanLanguage.PrintToSCA2
         Test.HumanLanguage.PrintToLexurgy
+        Test.Data.Dictionary.Utils
 
 
 
