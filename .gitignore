@@ -31,3 +31,5 @@ cabal.project.local*
 /.hkgr/
 /data/*.sca2
 /data/*.lexurgy
+./output/
+./working/

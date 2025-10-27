@@ -3,13 +3,14 @@
 
 module Main where
 
-import Control.Applicative (Applicative (..), (<$>))
+import Control.Applicative (Applicative (..), Alternative (..), (<$>))
 import Control.Arrow (second)
 import Control.Exception (SomeException, handle)
 import Control.Monad (MonadFail, fail, forM, when, (=<<))
+import Data.Bool (Bool (..), not)
 import Data.ByteString as BS
 import Data.Dictionary.Utils (composeDicts, reverseDict, (:=>))
-import Data.Foldable (mapM_, for_)
+import Data.Foldable (for_, mapM_)
 import Data.Function (($), (.))
 import Data.List qualified as List
 import Data.Map.Strict as Map
@@ -26,13 +27,14 @@ import GHC.Stack (HasCallStack)
 import HumanLanguage.Entry (Entry (..))
 import HumanLanguage.IPANormalize (normalizeIpaText)
 import HumanLanguage.LexurgyExport
-import System.Directory (getDirectoryContents, withCurrentDirectory)
+import System.Directory (getDirectoryContents, withCurrentDirectory, createDirectoryIfMissing)
 import System.Environment
 import System.Exit (ExitCode (..), exitSuccess, exitWith)
 import System.FilePath (FilePath, takeBaseName, takeExtension)
 import System.IO (IO)
 import Utils.IO (annotateIO, runLexurgy)
-import Prelude (Eq (..), Ord, (==))
+import Data.Eq (Eq (..))
+import Data.Ord (Ord (..))
 
 main :: IO ()
 main = do
@@ -69,13 +71,55 @@ body = do
 
   putStrLn "parsing complete."
 
-  -- write input files to lexurgy
+  createDirectoryIfMissing True workingDir
+  dicts :: [(FilePath, Text :=> Text, Text :=> Text)] <- doWorkInWorkingDir workingDir lexurgySoundChanges spellingToIpa
+
+  -- write final results files
+  for_ dicts $ \(ruleFileName, spellingToEvolved, evolvedToSpelling) -> do
+    let ruleName = takeBaseName ruleFileName
+        outputFilePath = outputDir <> "/" <> ruleName <> "_evolved_words.txt"
+        outputLines =
+          [ spelling <> "\t" <> T.intercalate ", " (Set.toList ipas)
+          | (spelling, ipas) <- Map.toList spellingToEvolved
+          ]
+        reverseOutputFilePath = outputDir <> "/" <> ruleName <> "_evolved_ipas.txt"
+        reverseOutputLines =
+          [ ipa <> "\t" <> T.intercalate ", " (Set.toList spellings)
+          | (ipa, spellings) <- Map.toList evolvedToSpelling
+          ]
+
+    createDirectoryIfMissing True outputDir
+    putStrLn $ "writing evolved words to: " <> T.pack outputFilePath
+    writeFile outputFilePath (encodeUtf8 . unlines $ outputLines)
+    putStrLn $ "writing reverse mapping to: " <> T.pack reverseOutputFilePath
+    writeFile reverseOutputFilePath (encodeUtf8 . unlines $ reverseOutputLines)
+
+    putStrLn $ "completed processing for rule: " <> T.pack ruleName
+
+linesToDict :: (MonadFail m, Alternative m) => Text -> Text -> m (Text :=> Text)
+linesToDict seperator contents = do
+  pairs <- for (List.filter (not . T.null) (lines contents)) $ \line -> do
+    let (spelling, rest) = Text.breakOn seperator line
+    when (T.null rest) . fail . T.unpack $
+      "Invalid line (missing separator '" <> seperator <> "'): " <> line
+    let ipa = T.strip (T.drop (T.length seperator) rest)
+    pure (strip spelling, Set.singleton ipa)
+  pure $ Map.fromListWith Set.union pairs
+
+doWorkInWorkingDir ::
+  (HasCallStack) =>
+  FilePath ->
+  [(FilePath, Text)] ->
+  Text :=> Text ->
+  IO [(FilePath, Text :=> Text, Text :=> Text)]
+doWorkInWorkingDir workingDir lexurgySoundChanges spellingToIpa =
   withCurrentDirectory workingDir $ do
-    do
-      -- write all_ipas.txt
-      let ipas = Set.unions (Map.elems spellingToIpa)
-      writeFile ipaFilePath (encodeUtf8 . unlines $ Set.toList ipas)
-      putStrLn $ "wrote all_ipas.txt with " <> show (Set.size ipas) <> " unique IPA entries."
+    -- write input files to lexurgy
+
+    -- write all_ipas.txt
+    let ipas = Set.unions (Map.elems spellingToIpa)
+    writeFile ipaFilePath (encodeUtf8 . unlines $ Set.toList ipas)
+    putStrLn $ "wrote all_ipas.txt with " <> show (Set.size ipas) <> " unique IPA entries."
 
     -- write rule files
     ruleFiles <- for lexurgySoundChanges $ \(fileBaseName, contents) -> do
@@ -86,47 +130,25 @@ body = do
     -- run lexurgy
     runLexurgy [ipaFilePath] `mapM_` ruleFiles
 
-    -- read lexurgy outputs and output final results
-    for_ ruleFiles $ \ruleFileName -> do
+    -- read lexurgy outputs and compute results
+    for ruleFiles $ \ruleFileName -> do
       let ruleName = takeBaseName ruleFileName
           wordFileName = takeBaseName ipaFilePath
-          evolvedFileName = wordFileName <> "_" <> ruleName <> ".wli"
+          evolvedFileName = wordFileName <> "_" <> ruleName <> ".wlm"
+      -- read lexurgy output
+      putStrLn $ "reading lexurgy output file: " <> T.pack evolvedFileName
       fileContents <- readUtf8File evolvedFileName
-      ipaToEvolved :: (HasCallStack) => Text :=> Text
-        <- linesToDict "=>" . normalizeIpaText $ fileContents
+
+      -- process into dictionaries
+      ipaToEvolved :: (HasCallStack) => Text :=> Text <-
+        linesToDict "=>" . normalizeIpaText $ fileContents
       let spellingToEvolved :: (HasCallStack) => Text :=> Text
           spellingToEvolved = composeDicts spellingToIpa ipaToEvolved
-          outputFilePath = outputDir <> "/" <> ruleName <> "_evolved_words.txt"
-          outputLines =
-            [ spelling <> "\t" <> T.intercalate ", " (Set.toList ipas)
-            | (spelling, ipas) <- Map.toList spellingToEvolved
-            ]
-      putStrLn $ "writing evolved words to: " <> T.pack outputFilePath
-      writeFile outputFilePath (encodeUtf8 . unlines $ outputLines)
-
-      let evolvedToSpelling :: (HasCallStack) => Text :=> Text
+          evolvedToSpelling :: (HasCallStack) => Text :=> Text
           evolvedToSpelling = reverseDict spellingToEvolved
-      let reverseOutputFilePath = outputDir <> "/" <> ruleName <> "_evolved_ipas.txt"
-      let reverseOutputLines =
-            [ ipa <> "\t" <> T.intercalate ", " (Set.toList spellings)
-            | (ipa, spellings) <- Map.toList evolvedToSpelling
-            ]
-      putStrLn $ "writing reverse mapping to: " <> T.pack reverseOutputFilePath
-      writeFile reverseOutputFilePath (encodeUtf8 . unlines $ reverseOutputLines)
-
-      putStrLn $ "completed processing for rule: " <> T.pack ruleName
+      pure (ruleFileName, spellingToEvolved, evolvedToSpelling)
   where
     ipaFilePath = "all_ipas.txt"
-
-linesToDict :: (MonadFail m) => Text -> Text -> m (Text :=> Text)
-linesToDict seperator contents = do
-  pairs <- for (lines contents) $ \line -> do
-    let (spelling, rest) = Text.breakOn seperator line
-    when (T.null rest) . fail . T.unpack $
-      "Invalid line (missing separator '" <> seperator <> "'): " <> line
-    let ipa = T.strip (T.drop (T.length seperator) rest)
-    pure (strip spelling, Set.singleton ipa)
-  pure $ Map.fromListWith Set.union pairs
 
 mkSpellingToIpa :: [[(Text, Text)]] -> Map Text (Set Text)
 mkSpellingToIpa list = unionsWith Set.union $ toMap <$> list
