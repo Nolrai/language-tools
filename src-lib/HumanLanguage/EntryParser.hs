@@ -1,5 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 -- |
 -- Module: HumanLanguage.EntryParser
 -- Summary: Lexing and parsing for entries.
@@ -17,35 +18,33 @@
 --    are reported as lexing errors rather than producing partial results.
 --  - ipaChars is a whitelist chosen to avoid accepting arbitrary input inside
 --    IPA spans; update it if you need to support more unicode categories.
-
 module HumanLanguage.EntryParser
-  ( parseFile
-  , parseFileFull
-  , parseEntry
-  , toTokens
-  , parseLine
-  , Token(..)
-  , tokenString
-  , IpaType(..)
-  ) where
+  ( parseFile,
+    parseFileFull,
+    parseEntry,
+    toTokens,
+    parseLine,
+    Token (..),
+    tokenString,
+    IpaType (..),
+  )
+where
 
-import HumanLanguage.Entry (Entry(..), Line(..), Case(..))
+import Control.Exception (throwIO)
+import Control.Monad.Except (Except, runExcept, throwError, withExcept)
+import Data.Either (partitionEithers)
+import Data.List qualified as List
+import Data.Text (Text)
+import Data.Text qualified as T
+import Data.Text.IO qualified as TIO
+import HumanLanguage.Entry (Case (..), Entry (..), Line (..))
 import HumanLanguage.IPA (isIPAChar)
 import HumanLanguage.IPANormalize
-
+import Text.Read (readMaybe)
 import Prelude
 
-import Control.Monad.Except (Except, runExcept, throwError, withExcept)
-import Control.Exception (throwIO)
-import Text.Read (readMaybe)
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
-import Data.Either (partitionEithers)
-import qualified Data.List as List
-
 -- | Convert Showable value to Text.
-tshow :: Show a => a -> Text
+tshow :: (Show a) => a -> Text
 tshow = T.pack . show
 
 -- | Default preview length for user-facing error messages.
@@ -56,7 +55,7 @@ defaultPreviewLen = 100
 shortenTo :: Int -> Text -> Text
 shortenTo n txt
   | T.length txt > n = T.take n txt <> "..."
-  | otherwise        = txt
+  | otherwise = txt
 
 -- | Truncate to defaultPreviewLen and append "..." when truncated.
 shorten :: Text -> Text
@@ -69,9 +68,9 @@ data IpaType = IpaSlashType | IpaSquareType
 -- | Lexical token types produced by 'toTokens'.
 data Token where
   -- | Inline note text (from parentheses).
-  Note :: { noteString :: Text } -> Token
+  Note :: {noteString :: Text} -> Token
   -- | IPA span with delimiter type and inner text.
-  Ipa  :: { ipaType :: IpaType, ipaString :: Text } -> Token
+  Ipa :: {ipaType :: IpaType, ipaString :: Text} -> Token
   -- | Field separator between "lines".
   Semicolon :: Token
   -- | Field separator between "cases".
@@ -90,13 +89,13 @@ tokenString Comma = throwError "Comma has no string"
 matchOpening :: Char -> Maybe IpaType
 matchOpening '/' = Just IpaSlashType
 matchOpening '[' = Just IpaSquareType
-matchOpening _   = Nothing
+matchOpening _ = Nothing
 
 -- | Map a closing delimiter character to its IpaType.
 matchEnding :: Char -> Maybe IpaType
 matchEnding '/' = Just IpaSlashType
 matchEnding ']' = Just IpaSquareType
-matchEnding _   = Nothing
+matchEnding _ = Nothing
 
 -- helper token-scan context; kept at module scope but not exported
 data TokenContext = IpaContext IpaType Text | NoteContext Text | NoContext
@@ -123,7 +122,6 @@ toTokens = go NoContext
                 Just ipaType -> go (IpaContext ipaType T.empty) cs
                 Nothing -> throwError $ "lexing failed: unexpected char in NoContext: " <> T.singleton c <> " in " <> txt
             Nothing -> pure []
-
     go (IpaContext ipaType sofar) txt =
       case T.uncons txt of
         Nothing -> throwError "lexing failed, unexpected end of line inside IPA"
@@ -137,7 +135,6 @@ toTokens = go NoContext
               if isIPAChar c
                 then go (IpaContext ipaType (T.cons c sofar)) cs
                 else throwError $ "lexing failed: invalid IPA character " <> T.singleton c <> " in " <> txt
-
     go (NoteContext sofar) txt =
       case T.uncons txt of
         Nothing -> throwError "lexing failed, unexpected end of line inside note"
@@ -145,7 +142,7 @@ toTokens = go NoContext
           case c of
             ')' -> (Note (T.reverse sofar) :) <$> go NoContext cs
             ',' -> (Note (T.reverse sofar) :) <$> go (NoteContext T.empty) cs
-            _   -> go (NoteContext (T.cons c sofar)) cs
+            _ -> go (NoteContext (T.cons c sofar)) cs
 
 -- | Parse a tokenized line into a Line: cases and trailing notes.
 parseLine :: Text -> Except Text Line
@@ -153,7 +150,7 @@ parseLine str = do
   tokens <- toTokens str
   let (lineNotes, rest) = getEndNotes tokens
   cases' <- parseCases rest
-  pure Line { cases = List.reverse cases', lineNotes = lineNotes }
+  pure Line {cases = List.reverse cases', lineNotes = lineNotes}
 
 -- Collects trailing Note tokens and returns the remaining tokens
 getEndNotes :: [Token] -> ([Text], [Token])
@@ -170,7 +167,7 @@ parseCases :: [Token] -> Except Text [Case]
 parseCases [] = pure []
 parseCases (Ipa _ ipaText : ts) = do
   let (caseNotes, rest) = spanWhileNotes ts
-  let caseEntry = Case { caseNotes = List.reverse caseNotes, ipa = ipaText }
+  let caseEntry = Case {caseNotes = List.reverse caseNotes, ipa = ipaText}
   rest' <-
     case rest of
       [] -> pure []
@@ -189,7 +186,7 @@ parseFileFull fileName = do
   let (errors, successes) =
         partitionEithers
           . List.map runExcept
-          . List.zipWith (\i -> withExcept (i,)) [(0 :: Int)..]
+          . List.zipWith (\i -> withExcept (i,)) [(0 :: Int) ..]
           $ parseEntry <$> entries
   if List.null errors
     then pure (Right successes)
@@ -218,7 +215,6 @@ parseEntry entry =
         Just rank -> do
           let rawLines = T.splitOn ";" rest
           parsedLines <- mapM parseLine rawLines
-          pure Entry { entryRank = rank, entrySpelling = spelling, entryLines = parsedLines }
+          pure Entry {entryRank = rank, entrySpelling = spelling, entryLines = parsedLines}
         Nothing -> throwError $ "invalid rank: " <> rankStr
     _ -> throwError $ "malformed entry (expected 3 tab fields): " <> entry
-

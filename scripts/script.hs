@@ -3,10 +3,9 @@
 
 module Main where
 
-import System.Process
-import System.IO
 import Data.Char (toUpper)
-
+import System.IO
+import System.Process
 
 main :: IO ()
 main = do

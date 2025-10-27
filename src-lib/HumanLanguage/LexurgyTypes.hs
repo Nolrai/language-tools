@@ -1,21 +1,22 @@
 module HumanLanguage.LexurgyTypes
-  ( Feature(..)
-  , VowelFeature(..)
-  , Height(..)
-  , Backness(..)
-  , ConsonantFeature(..)
-  , Place(..)
-  , Manner(..)
-  , Voice(..)
-  , FloatingFeature(..)
-  , Length(..)
-  , Stress(..)
-  , PrePost(..)
-  , LexurgyMeaning(..)
-  ) where
+  ( Feature (..),
+    VowelFeature (..),
+    Height (..),
+    Backness (..),
+    ConsonantFeature (..),
+    Place (..),
+    Manner (..),
+    Voice (..),
+    FloatingFeature (..),
+    Length (..),
+    Stress (..),
+    PrePost (..),
+    LexurgyMeaning (..),
+  )
+where
 
-import GHC.Generics (Generic)
 import Data.Set (Set)
+import GHC.Generics (Generic)
 
 -- Top-level feature sum (vowel / consonant / floating / syllabic / tiebar)
 data Feature
@@ -56,12 +57,29 @@ data ConsonantFeature
   deriving (Eq, Show, Ord, Generic)
 
 data Place
-  = Bilabial | Labiodental | InterDental | Dental | DentalAlveolar | Alveolar
-  | Postalveolar | Retroflex | Palatal | Velar | Labiovelar | Glottal
+  = Bilabial
+  | Labiodental
+  | InterDental
+  | Dental
+  | DentalAlveolar
+  | Alveolar
+  | Postalveolar
+  | Retroflex
+  | Palatal
+  | Velar
+  | Labiovelar
+  | Glottal
   deriving (Eq, Show, Enum, Ord, Bounded)
 
 data Manner
-  = Stop | Nasal | Fricative | Approximant | LateralApproximant | Trill | Tap | FricativeApproximant
+  = Stop
+  | Nasal
+  | Fricative
+  | Approximant
+  | LateralApproximant
+  | Trill
+  | Tap
+  | FricativeApproximant
   deriving (Eq, Show, Enum, Ord, Bounded)
 
 data Voice = Voiced | Voiceless
@@ -69,7 +87,10 @@ data Voice = Voiced | Voiceless
 
 -- Floating / suprasegmental features
 data FloatingFeature
-  = Aspiration | BreathyVoice | Stress Stress | Length Length
+  = Aspiration
+  | BreathyVoice
+  | Stress Stress
+  | Length Length
   deriving (Eq, Show, Ord, Generic)
 
 data Length = Half | Full | Long

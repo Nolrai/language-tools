@@ -1,14 +1,15 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
+
 module HumanLanguage.LexurgyInstances () where
 
-import Prelude
 import HumanLanguage.EnumerateGeneric
-  ( Enumerable(..)
-  , makeEnumOps
-  , minBoundFromVec
-  , maxBoundFromVec
+  ( Enumerable (..),
+    makeEnumOps,
+    maxBoundFromVec,
+    minBoundFromVec,
   )
 import HumanLanguage.LexurgyTypes
+import Prelude
 
 -- VowelFeature helpers -------------------------------------------------------
 instance Enumerable VowelFeature

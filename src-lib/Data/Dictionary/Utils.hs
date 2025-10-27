@@ -8,11 +8,16 @@
 -- |    of values of type `b`.
 -- |  * All functions preserve set semantics for values (duplicates are folded
 -- |    into sets).
-module Data.Dictionary.Utils where
+module Data.Dictionary.Utils
+  ( (:=>),
+    Data.Dictionary.Utils.fromList,
+    reverseDict,
+    composeDicts,
+  )
+where
 
-import Data.Set
-import Data.Map.Strict
-import Data.Text
+import Data.Map.Strict as Map
+import Data.Set as Set
 
 -- | Type alias for a map from keys of type @a@ to a set of values of type @b@.
 -- |
@@ -30,9 +35,11 @@ type a :=> b = Map a (Set b)
 -- fromList [("a",fromList [1,2]),("b",fromList [3])]
 fromList :: (Ord a, Ord b) => [(a, b)] -> a :=> b
 fromList entries =
-  fromListWith Set.union
+  fromListWith
+    Set.union
     [ (key, Set.singleton value)
-    | (key, value) <- entries ]
+    | (key, value) <- entries
+    ]
 
 -- | Invert a relation: turn a -> {b1,b2,...} into b -> {a1,a2,...}.
 -- |
@@ -41,12 +48,13 @@ fromList entries =
 -- | collected into a set.
 --
 -- Complexity: proportional to the total number of (key, value) pairs.
-reverseMap :: (Ord a, Ord b) => a :=> b -> b :=> a
-reverseMap dict =
-  fromList
-    [ (value, key)
-    | (key, values) <- toList dict
-    , value <- Set.toList values
+reverseDict :: (Ord a, Ord b) => a :=> b -> b :=> a
+reverseDict dict =
+  Map.fromListWith
+    Set.union
+    [ (value, Set.singleton key)
+    | (key, values) <- Map.toList dict,
+      value <- Set.toList values
     ]
 
 -- | Compose two relations (maps-of-sets).
@@ -56,18 +64,18 @@ reverseMap dict =
 -- | b -> c in map2. Intermediate keys with no mapping in map2 are ignored.
 --
 -- Example:
--- >>> composeMaps (fromList [('x','y')]) (fromList [('y','z')])
+-- >>> composeDicts (fromList [('x','y')]) (fromList [('y','z')])
 -- fromList [('x',fromList ['z'])]
 --
 -- Complexity: proportional to the number of (a,b) pairs plus the cost of
 -- looking up each b in map2 (map lookup cost).
-composeMaps :: (Ord a, Ord b, Ord c) => a :=> b -> b :=> c -> a :=> c
-composeMaps map1 map2 =
-  fromList
-    [ (key1, value2)
-    | (key1, values1) <- toList map1
-    , value1 <- Set.toList values1
-    , let maybeValues2 = lookup value1 map2
-    , Just values2 <- [maybeValues2]
-    , value2 <- Set.toList values2
+composeDicts :: (Ord a, Ord b, Ord c) => a :=> b -> b :=> c -> a :=> c
+composeDicts map1 map2 =
+  Map.fromListWith
+    Set.union
+    [ (key1, values2)
+    | (key1, values1) <- Map.toList map1,
+      value1 <- Set.toList values1,
+      let maybeValues2 = Map.lookup value1 map2,
+      Just values2 <- [maybeValues2]
     ]

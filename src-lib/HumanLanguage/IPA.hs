@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module HumanLanguage.IPA where
 
-import Data.Text (Text)
-import qualified Data.Text as T
 import Data.IntSet (IntSet)
-import qualified Data.IntSet as Set
-import qualified Data.List as List
+import Data.IntSet qualified as Set
+import Data.List qualified as List
+import Data.Text (Text)
+import Data.Text qualified as T
 
 -- | Check if a character is allowed inside IPA spans.
 isIPAChar :: Char -> Bool
@@ -17,16 +18,16 @@ ipaSet = Set.fromList (List.map fromEnum (T.unpack ipaChars))
 
 -- | Text of allowed IPA characters.
 ipaChars :: Text
-ipaChars = T.concat
-  [ "IꞮ" -- UppercaseLetter
-  , "abcdefghijklmnoprstuvwxyz" -- english lowercase letters (q omitted)
-  , "äæçðøŋɐɑɒɔɘəɚɛɜɝɞɪɫɯɵɹɾʃʈʉʊʌʍʒθ" -- other letters
-  , "ɨɐœɶɤ" -- other vowels not used in English
-  , "ʰʱˈːˑ" -- modifier letters
-  , "ʔ" -- glottal stop
-  , T.pack "\771\776\778\794\798\799\800\805\809\810\815" -- NonSpacingMark codepoints
-  , T.pack "\742\743" -- ModifierSymbol
-  , "." -- SyllableBreak
-  , "()" -- parentheses for optional segments
-  ]
-
+ipaChars =
+  T.concat
+    [ "IꞮ", -- UppercaseLetter
+      "abcdefghijklmnoprstuvwxyz", -- english lowercase letters (q omitted)
+      "äæçðøŋɐɑɒɔɘəɚɛɜɝɞɪɫɯɵɹɾʃʈʉʊʌʍʒθ", -- other letters
+      "ɨɐœɶɤ", -- other vowels not used in English
+      "ʰʱˈːˑ", -- modifier letters
+      "ʔ", -- glottal stop
+      T.pack "\771\776\778\794\798\799\800\805\809\810\815", -- NonSpacingMark codepoints
+      T.pack "\742\743", -- ModifierSymbol
+      ".", -- SyllableBreak
+      "()" -- parentheses for optional segments
+    ]
