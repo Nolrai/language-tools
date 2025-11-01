@@ -7,6 +7,7 @@ import Test.HumanLanguage.LexurgyInstances qualified as LexurgyInstances
 import Test.HumanLanguage.PrintToLexurgy qualified as PrintToLexurgy
 import Test.Tasty
 import Test.Data.Dictionary.Utils qualified as DictionaryUtils
+import Test.IOUtf8
 
 main :: IO ()
 main = defaultMain tests
@@ -25,8 +26,8 @@ tests =
           PrintToLexurgy.tests
         ]
     ]
-  , testGroup
-    "Data.Dictionary.Utils tests"
-    [ DictionaryUtils.tests
+  , testGroup "Utils tests"
+    [ DictionaryUtils.tests,
+      Test.IOUtf8.tests
     ]
   ]

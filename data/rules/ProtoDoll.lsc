@@ -1,3 +1,31 @@
+# ---- Consonants Symbols ----
+# Plosives (p-)
+Symbol p1w, p1b, p1n
+Symbol p2w, p2b, p2n
+Symbol p3w, p3b, p3n
+
+# Fricatives (s-)
+Symbol s1w, s1b, s1n
+Symbol s2w, s2b, s2n
+Symbol s3w, s3b, s3n
+
+# Affricates (c-)
+Symbol c1w, c1b, c1n
+Symbol c2w, c2b, c2n
+Symbol c3w, c3b, c3n
+
+# Liminals
+Symbol t0 # (tap / colorless)
+Symbol h2w # (breathy / release noise)
+
+# q - extra-short neutral ("colorless") vowel.
+class vowel {a, i, e, o, u, q}
+class plosive {p1w, p1b, p1n, p2w, p2b, p2n, p3w, p3b, p3n}
+class fricative {s1w, s1b, s1n, s2w, s2b, s2n, s3w, s3b, s3n}
+class affricate {c1w, c1b, c1n, c2w, c2b, c2n, c3w, c3b, c3n}
+class consonant {@plosive, @fricative, @affricate}
+class liminal {t0, h2w}
+
 # gloss
 class gloss {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,Æ}
 
@@ -10,49 +38,169 @@ american-eye:
 pin-pen-merger:
   ɛ => ɪ
 
+# "-ʰ" is allophonic with "-" in English, so it is dropped.
+remove-aspiration:
+  ʰ => *
+
 # One of my sources uses "r" for the English rhotic r sound,
 # but I prefer to use the turned r symbol ɹ for that sound
 rhotacization:
   r => ɹ
 
-# before applying glottalization, we need to take care of some other changes
-# that
+## English to ProtoDoll proper starts here
 
-# turn semivowels into their corresponding high vowels or r-colored vowels
-vocalization:
-  j => i
-  w => u
-  ɹ => ɚ
+# split rhotic vowels into vowel + rhotic so later rules can map ɹ -> iq
+split-rhotic:
+  ɚ => ə ɹ
+  ɝ => ə ɹ
 
-# turn all remaining approximants into l
-approximant-simplification:
-  [approximant] => l
+  ɑɹ => a ɹ
+  ɔɹ => o ɹ
+  ɪɹ => i ɹ
+  ɛɹ => e ɹ
+  ʊɹ => u ɹ
 
-# The speakers of ProtoDoll don't have lips or tongues, so they can't make
-# labial or coronal sounds.
+# input: ipa
+# output: protodoll_internal
 
-# Convert them to glottal sounds, but because they have a syrinx they can approximate some of the sounds with what we are going to call nasals. That is also why they can still make the full range of vowel sounds, and make nasals without using the tongue,lip, nose.
+# rules:
 
-# Turn all stops and fricatives into ʔ, h, or m depending on voicing and manner
-glottalize:
-  {[stop], [trill], [tap]} => ʔ
-  [-voiced fricative] => h
-  [+voiced fricative] => m
+# ---- Vowel rules ----
 
-# Turn all nasals into ŋ
-unify-nasals:
-  [nasal] => ŋ
+# Syllabic nasals
+# needs to before the vowel rules
+decompose-syllabic-nasals:
+  n̩ => nə
+  m̩ => mə
+  ŋ̩ => ŋə
 
-# An aspirated glottal stop is really just a sequence of a glottal stop and an h
-seperate-aspiration:
-  ʔʰ => ʔh
+# Diphthongs (explicit)
+# needs to be before the /ɪ/ contextual rules
+standardize-diphthongs:
+  aɪ => ai
+  aʊ => ao
+  ɔɪ => oi
+  eɪ => ei
+  oʊ => ou
 
-# insert an h between consecutive glottal stops to avoid hiatus
-glottal-stop-epenthesis:
-  ʔʔ => ʔhʔ
+# /ɪ/ contextual rules
 
-# The speakers of ProtoDoll can't round or unround their lips, so all vowels
-# are either rounded or unrounded depending on their backness.
-vowel-derounding:
-  {[nearback], [back]} => [+rounded]
-  {[front], [nearfront]} => [-rounded]
+ih-contextual-rules:
+  ˈɪ => e
+  ˌɪ => e
+  ɪ {i,j,e} => i
+  ɪ => q
+  eɪ => ei
+
+remove-length:
+  uː => u
+  iː => i
+
+# Full vowels and schwa
+simplify-to-i:
+  i => i
+
+simplify-to-e:
+  e => e
+  ɛ => e
+
+simplify-to-a:
+  æ => a
+  a => a
+  ʌ => a
+
+simplify-to-o:
+  ɑ => o
+  ɒ => o
+  ɔ => o
+  o => o
+
+simplify-to-u:
+  u => u
+  ʊ => u
+
+simplify-to-q:
+  {ə, ɘ, ɨ} => q
+
+to-consonant-symbol:
+  tʃ => c3w
+  dʒ => c3b
+  ts => c2w
+  dz => c2b
+
+  p => p1w
+  b => p1b
+  m => p1n
+
+  t => p2w
+  d => p2b
+  n => p2n
+
+  k => p3w
+  g => p3b
+  ŋ => p3n
+
+  f => s1w
+  v => s1b
+  θ => s1w
+  ð => s1b
+
+  s => s2w
+  z => s2b
+
+  ʃ => s3w
+  ʒ => s3b
+
+  h => h2w
+
+# ---- Tap / glottal ----
+  ɾ => t0
+  ʔ => t0
+
+# ---- Approximants / liquids -> vowels-chords ----
+  j => ie
+  w => uo
+  l => aq
+  ɹ => iq
+
+# ---- Cluster handling: insert reduced vowel 'q' if two consonant codes collide ----
+  * => q / @consonant _ @consonant
+
+romanizer:
+# ---- Cleanup & projection rules (optional human-friendly projection) ----
+# Map internal codes to outward Latin pair (presentation layer)
+  p1w => p
+  p1b => b
+  p1n => m
+  p2w => t
+  p2b => d
+  p2n => n
+  p3w => k
+  p3b => g
+  p3n => ng
+
+  s1w => f
+  s1b => v
+  s2w => s
+  s2b => z
+  s3w => sh
+  s3b => zh
+
+  c1w => pf
+  c1b => bv
+  c2w => ts
+  c2b => dz
+  c3w => ch
+  c3b => jz
+
+  t0 => t0
+  h2w => h
+
+# vowel-chord projections
+  ie => y
+  uo => w
+  ea => l
+  aq => l
+  qq => l
+  iq => r
+  q => ə

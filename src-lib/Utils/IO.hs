@@ -9,6 +9,9 @@
 module Utils.IO
   ( runLexurgy,
     annotateIO,
+    errorIO,
+    readFileUtf8,
+    writeFileUtf8
   )
 where
 
@@ -22,6 +25,12 @@ import HumanLanguage.LexurgyExport (lexurgyPath)
 import System.FilePath (FilePath, takeBaseName)
 import System.IO (IO, putStrLn)
 import System.Process (callProcess, showCommandForUser)
+import Control.Category ((.))
+import qualified Data.ByteString as BS
+import Data.Text.Encoding (decodeUtf8', encodeUtf8)
+import GHC.IO.Exception (userError)
+import Data.Either (Either(..))
+import Control.Applicative (pure)
 
 -- | Run the `lexurgy` executable with the given extra args and rule file.
 -- |
@@ -82,3 +91,16 @@ annotateIO :: Text -> IO a -> IO a
 annotateIO ctx action =
   action `catch` \(e :: SomeException) ->
     throwIO (AnnotatedException {context = ctx, originalException = e})
+
+errorIO :: Text -> IO a
+errorIO = throwIO . userError . T.unpack
+
+readFileUtf8 :: FilePath -> IO Text
+readFileUtf8 fp = do
+  bs <- BS.readFile fp
+  case decodeUtf8' bs of
+    Left err -> throwIO (userError $ "Invalid UTF-8 in " <> fp <> ": " <> show err)
+    Right t  -> pure t
+
+writeFileUtf8 :: FilePath -> Text -> IO ()
+writeFileUtf8 fp txt = BS.writeFile fp (encodeUtf8 txt)

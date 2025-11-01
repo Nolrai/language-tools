@@ -16,7 +16,9 @@ module Data.Dictionary.Utils
     Data.Dictionary.Utils.fromList,
     reverseDict,
     composeDicts,
+    composeAndFindMissing,
     linesToDict,
+    dictToLines,
   )
 where
 
@@ -26,7 +28,7 @@ import Control.Applicative (Applicative (pure))
 import Data.Text (Text)
 import qualified Data.List as List
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
+import qualified Data.Text.IO as TIO (putStrLn)
 import Data.Ord
 import Data.Maybe
 import System.IO (IO)
@@ -97,6 +99,60 @@ composeDicts map1 map2 =
       Just values2 <- [maybeValues2]
     ]
 
+-- ...existing code...
+-- | Compose two relations like 'composeDicts', but also report any intermediate
+-- | keys that were referenced by the first relation but missing from the second.
+-- |
+-- | Given
+-- |   map1 :: a :=> b    -- a -> {b}
+-- |   map2 :: b :=> c    -- b -> {c}
+-- |
+-- | Returns a pair:
+-- |   (resultMap, missingBs)
+-- |
+-- | where:
+-- |  * resultMap :: a :=> c contains an entry a -> S where S is the union of
+-- |    all c values reachable from a via any b in map1 that exists in map2.
+-- |    If none of a's b-values are present in map2, a will NOT appear in resultMap.
+-- |  * missingBs :: Set b contains every b that appeared in map1 but had no
+-- |    mapping in map2 (unique, de‑duplicated).
+-- |
+-- | Behavior notes:
+-- |  * Only the first-level keys from map1 are iterated; the function does not
+-- |    transitively follow further links beyond map2.
+-- |  * The function ignores b-values that are present in map2 but whose
+-- |    resulting c-set is empty (they contribute no c-values).
+-- |
+-- | Complexity:
+-- |  Let P be the total number of (a,b) pairs in map1 and let M be the size of
+-- |  map2. Complexity is dominated by map lookups and set unions: roughly
+-- |  O(P * log M + U * log S) where U is the total number of produced c-values
+-- |  and S is set sizes encountered during union operations.
+-- |
+-- | Examples:
+-- | >>> let m1 = fromList [("x","y"),("x","z")] :: Text :=> Text
+-- | >>> let m2 = fromList [("y","u"),("y","v")] :: Text :=> Text
+-- | >>> composeAndFindMissing m1 m2
+-- | (fromList [("x",fromList ["u","v"])], fromList ["z"])
+-- |
+composeAndFindMissing :: forall a b c. (Ord a, Ord b, Ord c) => a :=> b -> b :=> c -> (a :=> c, Set b)
+composeAndFindMissing map1 map2 =
+  Map.foldrWithKey step (Map.empty, Set.empty) map1
+  where
+    step :: a -> Set b -> (a :=> c, Set b) -> (a :=> c, Set b)
+    step key1 values1 (accMap, accMissing) =
+      let (newValues, missingValues) =
+            Set.foldr
+              (\value1 (valsAcc, missAcc) ->
+                case Map.lookup value1 map2 of
+                  Just values2 -> (Set.union valsAcc values2, missAcc)
+                  Nothing -> (valsAcc, Set.insert value1 missAcc))
+              (Set.empty, accMissing)
+              values1
+      in if Set.null newValues
+            then (accMap, missingValues)
+            else (Map.insertWith Set.union key1 newValues accMap, missingValues)
+
 {-|
 Parse a block of text containing line-based "spelling<separator>ipa" pairs into a
 dictionary mapping each spelling to a set of IPA transcriptions.
@@ -135,11 +191,25 @@ Notes
 linesToDict :: Text -> Text -> IO (Text :=> Text)
 linesToDict seperator contents = do
   let textLines = List.filter (not . T.null) (T.lines contents)
-  _ <- TIO.putStrLn $ "Parsing " <> T.show (List.length textLines) <> " non-empty lines."
+  TIO.putStrLn $ "Parsing " <> T.show (List.length textLines) <> " non-empty lines."
   pairs <- for textLines $ \line -> do
     let (spelling', rest') = T.breakOn seperator line
     let spelling = T.strip spelling'
-    let rest = if T.null rest' then spelling else rest'
-    let ipa = T.strip (T.drop (T.length seperator) rest)
-    pure (spelling, Set.singleton ipa)
+    let rest = if T.null rest' then spelling else T.drop (T.length seperator) rest'
+    pure (spelling, Set.singleton (T.strip rest))
   pure $ Map.fromListWith Set.union pairs
+
+-- | Serialize a dictionary (map-of-sets) into line-based "key<separator>value" pairs.
+-- | Each (key, value) pair in the dictionary produces one line in the output.
+-- | If a key maps to multiple values, multiple lines are produced (one per value).
+
+dictToLines :: Text -> Text :=> Text -> IO Text
+dictToLines seperator dict = do
+  let pairs =
+        [ key <> seperator <> val
+        | (key, vals) <- Map.toAscList dict
+        , val <- Set.toAscList vals
+        ]
+      out = T.unlines pairs
+  _ <- TIO.putStrLn $ "Serializing " <> T.show (List.length pairs) <> " pairs."
+  pure out
